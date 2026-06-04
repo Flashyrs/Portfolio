@@ -2,7 +2,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowUpRight, Terminal as TerminalIcon } from 'lucide-react';
 import { resumeData } from '../data/resumeData';
-import { DeveloperIllustration } from './DeveloperIllustration';
 
 const GithubIcon: React.FC<{ size?: number; className?: string }> = ({ size = 18, className }) => (
   <svg
@@ -153,18 +152,8 @@ export const HeroSection: React.FC = () => {
           </motion.div>
         </div>
 
-        {/* Backend Console & Face SVG Graphic (strictly 90-degree rectangle corners) */}
-        <div className="lg:col-span-5 w-full flex flex-col gap-6">
-          {/* Custom vector illustration of Roshan - positioned neatly above the terminal as a graphic widget */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.15 }}
-            className="w-24 h-24 border border-border-muted bg-bg-card p-1 shrink-0 self-center lg:self-start rounded-none"
-          >
-            <DeveloperIllustration className="w-full h-full text-zinc-400" />
-          </motion.div>
-
+        {/* Backend Console Widget (strictly 90-degree rectangle corners) */}
+        <div className="lg:col-span-5 w-full">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}

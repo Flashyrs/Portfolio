@@ -1,12 +1,23 @@
 @import "tailwindcss";
 
+:root {
+  --theme-bg: #1c1917;
+  --theme-text: #d6d3d1;
+  --theme-accent: #d97706;
+  --theme-accent-hover: #f59e0b;
+  --theme-accent-dark: #b45309;
+  --theme-bg-card: #292524;
+  --theme-border-muted: #383533;
+  --theme-grid-dot: rgba(217, 119, 6, 0.04);
+}
+
 @theme {
-  --color-accent-teal: #14b8a6;
-  --color-accent-teal-hover: #2dd4bf;
-  --color-accent-teal-dark: #0f766e;
-  --color-bg-dark: #09090b;
-  --color-bg-card: #121214;
-  --color-border-muted: #27272a;
+  --color-accent-teal: var(--theme-accent);
+  --color-accent-teal-hover: var(--theme-accent-hover);
+  --color-accent-teal-dark: var(--theme-accent-dark);
+  --color-bg-dark: var(--theme-bg);
+  --color-bg-card: var(--theme-bg-card);
+  --color-border-muted: var(--theme-border-muted);
   
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
@@ -18,8 +29,8 @@ html {
 }
 
 body {
-  background-color: #09090b;
-  color: #a1a1aa; /* zinc-400 */
+  background-color: var(--theme-bg);
+  color: var(--theme-text);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   overflow-x: hidden;
 }
@@ -30,13 +41,13 @@ body {
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #09090b;
+  background: var(--theme-bg);
 }
 ::-webkit-scrollbar-thumb {
-  background: #27272a;
+  background: var(--theme-border-muted);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #14b8a6; /* Teal scrollbar indicator on hover */
+  background: var(--theme-accent); /* Dynamic accent scrollbar indicator on hover */
 }
 
 /* Fade-in animation class helper */
@@ -57,6 +68,6 @@ body {
 
 /* Micro-dot grid background effect */
 .bg-grid-dots {
-  background-image: radial-gradient(rgba(20, 184, 166, 0.03) 1px, transparent 1px);
+  background-image: radial-gradient(var(--theme-grid-dot) 1px, transparent 1px);
   background-size: 24px 24px;
 }

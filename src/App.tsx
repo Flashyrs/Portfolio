@@ -6,6 +6,7 @@ import { ProjectsSection } from './components/ProjectsSection';
 import { SkillsSection } from './components/SkillsSection';
 import { EducationSection } from './components/EducationSection';
 import { ContactSection } from './components/ContactSection';
+import { ThemeCustomizer } from './components/ThemeCustomizer';
 
 function App() {
   return (
@@ -23,6 +24,9 @@ function App() {
         <EducationSection />
         <ContactSection />
       </main>
+
+      {/* Floating Theme Color Customizer */}
+      <ThemeCustomizer />
     </div>
   );
 }
