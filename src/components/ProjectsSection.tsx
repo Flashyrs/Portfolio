@@ -34,7 +34,7 @@ export const ProjectsSection: React.FC = () => {
             Technical Projects
           </h2>
           <p className="mt-2 text-sm text-zinc-500 max-w-xl">
-            Selected engineering projects demonstrating system design, low-latency communication, and automation pipelines.
+            Selected engineering projects demonstrating system design, database optimization, and high-performance backend services.
           </p>
         </div>
 
@@ -136,7 +136,7 @@ export const ProjectsSection: React.FC = () => {
                 Looking for more of my work?
               </h3>
               <p className="text-xs text-zinc-400 font-sans max-w-xl leading-relaxed">
-                I maintain multiple other open-source repositories covering low-latency network components, database connection pooling configurations, multithreading playground projects, and practical AI tools.
+                I maintain multiple other open-source repositories covering data structures, algorithm implementations, and backend system utilities.
               </p>
             </div>
             <a

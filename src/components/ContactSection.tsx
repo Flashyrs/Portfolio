@@ -39,7 +39,7 @@ export const ContactSection: React.FC = () => {
             Get In Touch
           </h2>
           <p className="mt-2 text-sm text-zinc-500">
-            Let's discuss distributed architectures, low-latency design, database optimization, or potential collaborations.
+            Let's discuss distributed architectures, system optimization, database indexing, or full-time SDE opportunities.
           </p>
         </div>
 
@@ -145,7 +145,7 @@ export const ContactSection: React.FC = () => {
                 {resumeData.location}
               </span>
               <span className="text-[10px] font-mono text-zinc-500 mt-1 block">
-                Open to relocation & remote work
+                Open to SDE roles (Relocation / Hybrid)
               </span>
             </div>
           </motion.div>
@@ -160,7 +160,7 @@ export const ContactSection: React.FC = () => {
           <div className="flex items-center gap-4">
             <span>Designed & Engineered in India</span>
             <span>•</span>
-            <a href={resumeData.links.github} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+            <a href="https://github.com/Flashyrs/Portfolio" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
               Source Code
             </a>
           </div>

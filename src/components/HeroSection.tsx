@@ -63,11 +63,8 @@ export const HeroSection: React.FC = () => {
         {/* Typographical Profile Info */}
         <div className="lg:col-span-7 flex flex-col justify-center">
           
-          {/* Avatar Stamp and Badge Container */}
+          {/* Status Badge */}
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-16 h-16 border border-border-muted bg-bg-card p-1 flex items-center justify-center shrink-0">
-              <DeveloperIllustration className="w-full h-full text-zinc-400" />
-            </div>
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
@@ -78,7 +75,7 @@ export const HeroSection: React.FC = () => {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-teal opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-accent-teal"></span>
               </span>
-              <span>Available for Full-time Roles</span>
+              <span>Seeking Full-time SDE Roles</span>
             </motion.div>
           </div>
 
@@ -156,8 +153,18 @@ export const HeroSection: React.FC = () => {
           </motion.div>
         </div>
 
-        {/* Backend Console / Terminal Widget (strictly 90-degree rectangle corners) */}
-        <div className="lg:col-span-5 w-full">
+        {/* Backend Console & Face SVG Graphic (strictly 90-degree rectangle corners) */}
+        <div className="lg:col-span-5 w-full flex flex-col gap-6">
+          {/* Custom vector illustration of Roshan - positioned neatly above the terminal as a graphic widget */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.15 }}
+            className="w-24 h-24 border border-border-muted bg-bg-card p-1 shrink-0 self-center lg:self-start rounded-none"
+          >
+            <DeveloperIllustration className="w-full h-full text-zinc-400" />
+          </motion.div>
+
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -191,10 +198,10 @@ export const HeroSection: React.FC = () => {
               <div className="text-zinc-500 bg-zinc-950/40 p-3 border border-border-muted/30 rounded-none">
                 <pre className="text-accent-teal overflow-x-auto whitespace-pre">
 {`{
-  "status": "healthy",
+  "status": "seeking_sde_roles",
   "uptime": "99.99%",
   "active_stack": ["Java", "Spring Boot", "Redis"],
-  "focus": "Distributed Systems"
+  "focus": "Backend Systems"
 }`}
                 </pre>
               </div>
