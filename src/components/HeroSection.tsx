@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, Play, Activity } from 'lucide-react';
 import { resumeData } from '../data/resumeData';
 
 const GithubIcon: React.FC<{ size?: number; className?: string }> = ({ size = 18, className }) => (
@@ -50,7 +50,12 @@ const LeetcodeIcon: React.FC<{ size?: number; className?: string }> = ({ size = 
   </svg>
 );
 
-export const HeroSection: React.FC = () => {
+interface HeroSectionProps {
+  setActiveSim: (val: 'none' | 'symptomwise' | 'reddit' | 'both') => void;
+  setView: (val: 'home' | 'deep-dive') => void;
+}
+
+export const HeroSection: React.FC<HeroSectionProps> = ({ setActiveSim, setView }) => {
   return (
     <section className="relative min-h-[80vh] flex flex-col justify-center bg-grid-dots overflow-hidden">
       <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
@@ -102,12 +107,43 @@ export const HeroSection: React.FC = () => {
             {resumeData.about}
           </motion.p>
 
+          {/* Primary & Secondary Call to Actions */}
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.25 }}
+            className="mt-8 flex flex-wrap gap-4"
+          >
+            <button
+              onClick={() => {
+                setActiveSim('both');
+                setTimeout(() => {
+                  document.getElementById('simulator-workspace')?.scrollIntoView({ behavior: 'smooth' });
+                }, 120);
+              }}
+              className="flex items-center gap-2 px-5 py-2.5 bg-theme-text text-bg-dark border-2 border-border-muted font-mono font-bold text-xs hover:opacity-90 transition-all active:scale-95 shadow-brutalist cursor-pointer"
+            >
+              <Play size={14} fill="currentColor" />
+              <span>Launch Simulator Workspace</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setView('deep-dive');
+              }}
+              className="flex items-center gap-2 px-5 py-2.5 bg-bg-card hover:bg-zinc-100 dark:hover:bg-zinc-800 text-theme-text border-2 border-border-muted font-mono font-bold text-xs transition-all active:scale-95 shadow-brutalist cursor-pointer"
+            >
+              <Activity size={14} />
+              <span>Architecture Deep Dive</span>
+            </button>
+          </motion.div>
+
           {/* Social Links & CTAs */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="mt-8 flex flex-wrap gap-4 items-center"
+            transition={{ duration: 0.5, delay: 0.35 }}
+            className="mt-6 flex flex-wrap gap-4 items-center"
           >
             <a
               href={resumeData.links.linkedin}

@@ -3,7 +3,12 @@ import { Copy, Check, FileDown, Menu, X } from 'lucide-react';
 import { resumeData } from '../data/resumeData';
 import { ThemeToggle } from './ThemeToggle';
 
-export const Navbar: React.FC = () => {
+interface NavbarProps {
+  view: 'home' | 'deep-dive';
+  setView: (val: 'home' | 'deep-dive') => void;
+}
+
+export const Navbar: React.FC<NavbarProps> = ({ view, setView }) => {
   const [copied, setCopied] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -17,21 +22,43 @@ export const Navbar: React.FC = () => {
     }
   };
 
+  const handleNavLink = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
+    if (view === 'deep-dive') {
+      e.preventDefault();
+      setView('home');
+      setTimeout(() => {
+        const element = document.getElementById(targetId);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 120);
+    }
+    setIsOpen(false);
+  };
+
   return (
     <nav className="fixed top-0 left-0 w-full z-50 border-b-2 border-border-muted bg-bg-dark/85 backdrop-blur-md">
       <div className="w-full px-6 md:px-8 h-16 flex items-center justify-between">
         {/* Brand Logo - Keep lowercase, remove brackets */}
-        <a href="#" className="font-mono text-theme-text font-bold text-lg flex items-center group">
+        <a 
+          href="#" 
+          onClick={(e) => {
+            e.preventDefault();
+            setView('home');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          className="font-mono text-theme-text font-bold text-lg flex items-center group"
+        >
           <span className="text-theme-text group-hover:underline">roshan.shukla</span>
           <span className="text-accent-teal font-semibold">()</span>
         </a>
  
         {/* Desktop Navigation Links */}
         <div className="hidden md:flex items-center gap-8">
-          <a href="#experience" className="text-xs uppercase tracking-widest font-mono text-theme-text-muted hover:text-theme-text transition-colors">Experience</a>
-          <a href="#projects" className="text-xs uppercase tracking-widest font-mono text-theme-text-muted hover:text-theme-text transition-colors">Projects</a>
-          <a href="#skills" className="text-xs uppercase tracking-widest font-mono text-theme-text-muted hover:text-theme-text transition-colors">Skills</a>
-          <a href="#contact" className="text-xs uppercase tracking-widest font-mono text-theme-text-muted hover:text-theme-text transition-colors">Contact</a>
+          <a href="#experience" onClick={(e) => handleNavLink(e, 'experience')} className="text-xs uppercase tracking-widest font-mono text-theme-text-muted hover:text-theme-text transition-colors">Experience</a>
+          <a href="#projects" onClick={(e) => handleNavLink(e, 'projects')} className="text-xs uppercase tracking-widest font-mono text-theme-text-muted hover:text-theme-text transition-colors">Projects</a>
+          <a href="#skills" onClick={(e) => handleNavLink(e, 'skills')} className="text-xs uppercase tracking-widest font-mono text-theme-text-muted hover:text-theme-text transition-colors">Skills</a>
+          <a href="#contact" onClick={(e) => handleNavLink(e, 'contact')} className="text-xs uppercase tracking-widest font-mono text-theme-text-muted hover:text-theme-text transition-colors">Contact</a>
         </div>
  
         {/* Quick Actions (Desktop) */}
@@ -87,28 +114,28 @@ export const Navbar: React.FC = () => {
           <div className="flex flex-col gap-4">
             <a
               href="#experience"
-              onClick={() => setIsOpen(false)}
+              onClick={(e) => handleNavLink(e, 'experience')}
               className="text-sm font-mono uppercase tracking-wider text-theme-text-muted hover:text-theme-text transition-colors"
             >
               Experience
             </a>
             <a
               href="#projects"
-              onClick={() => setIsOpen(false)}
+              onClick={(e) => handleNavLink(e, 'projects')}
               className="text-sm font-mono uppercase tracking-wider text-theme-text-muted hover:text-theme-text transition-colors"
             >
               Projects
             </a>
             <a
               href="#skills"
-              onClick={() => setIsOpen(false)}
+              onClick={(e) => handleNavLink(e, 'skills')}
               className="text-sm font-mono uppercase tracking-wider text-theme-text-muted hover:text-theme-text transition-colors"
             >
               Skills
             </a>
             <a
               href="#contact"
-              onClick={() => setIsOpen(false)}
+              onClick={(e) => handleNavLink(e, 'contact')}
               className="text-sm font-mono uppercase tracking-wider text-theme-text-muted hover:text-theme-text transition-colors"
             >
               Contact
