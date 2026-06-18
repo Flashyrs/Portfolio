@@ -62,7 +62,7 @@ export const SystemSimulator: React.FC = () => {
       activeWorkers: [],
       latencyStats: [],
       vram: 70,
-      logs: ['[SYSTEM] Initializing LLM Inference Pipeline...', '[SYSTEM] Status: Bounded Queue capacity = 5. VRAM Limit = 100%'],
+      logs: ['[SYSTEM] Initializing LLM Inference Pipeline...', '[SYSTEM] Status: Bounded Queue capacity = 50. VRAM Limit = 100%'],
       requestIndex: 0,
       lastRequestTime: 0,
       nextRequestDelay: 1500
@@ -181,10 +181,10 @@ export const SystemSimulator: React.FC = () => {
             return a.priority - b.priority;
           });
 
-          if (state.queue.length > 5) {
+          if (state.queue.length > 50) {
             setGameState('crashed');
             setCrashReason('QUEUE_OVERFLOW');
-            newLogs.push(`[CRITICAL] Queue Overflow! Capacity (> 5) exceeded.`);
+            newLogs.push(`[CRITICAL] Queue Overflow! Capacity (> 50) exceeded.`);
             clearInterval(intervalId);
           }
         }
@@ -430,7 +430,7 @@ export const SystemSimulator: React.FC = () => {
                 <p className="text-[11px] text-zinc-400 max-w-sm">
                   {crashReason === 'OOM' 
                     ? 'CUDA Out-of-Memory (OOM)! VRAM reached 100% on the RTX 3050 GPU.' 
-                    : 'Queue Overflow! Backlog capacity of 5 requests exceeded.'}
+                    : 'Queue Overflow! Backlog capacity of 50 requests exceeded.'}
                 </p>
               </div>
               <button
@@ -588,7 +588,7 @@ export const SystemSimulator: React.FC = () => {
 
                 <div className="p-3 border-2 border-[#1f2026] bg-[#13151b] flex items-center justify-between">
                   <div>
-                    <div className="text-[9px] font-extrabold text-zinc-200">Bounded Priority Queue</div>
+                    <div className="text-[9px] font-extrabold text-zinc-200">Bounded Priority Queue ({renderStats.queue.length}/50)</div>
                     <div className="text-[8px] text-zinc-500 font-semibold mt-0.5">
                       Aging: {queueAgingEnabled ? 'ACTIVE' : 'INACTIVE'}
                     </div>

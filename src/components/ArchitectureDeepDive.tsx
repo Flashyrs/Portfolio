@@ -100,13 +100,13 @@ export const ArchitectureDeepDive: React.FC<ArchitectureDeepDiveProps> = ({ setV
     queue: {
       title: 'Bounded Priority Queue with Aging',
       sub: 'System Memory Safeguard',
-      description: 'Maintains incoming request lines when GPU workers are fully occupied. The queue is capped at a strict capacity of 5 requests to protect VRAM. Sorts tasks dynamically by emergency levels, adding aging multipliers to prevent routine starvation.',
+      description: 'Maintains incoming request lines when GPU workers are fully occupied. The queue is capped at a strict capacity of 50 requests to protect VRAM. Sorts tasks dynamically by emergency levels, adding aging multipliers to prevent routine starvation.',
       metrics: [
-        { label: 'Capacity Cap', value: '5 slots' },
+        { label: 'Capacity Cap', value: '50 slots' },
         { label: 'Aging Multiplier', value: '+0.5/sec' },
         { label: 'Shedding Cap', value: '100%' }
       ],
-      failureMitigation: 'If the queue reaches 5, the load-shedder drops the lowest priority requests and triggers webhook alerts (system busy), avoiding catastrophic VRAM crashes.',
+      failureMitigation: 'If the queue reaches 50, the load-shedder drops the lowest priority requests and triggers webhook alerts (system busy), avoiding catastrophic VRAM crashes.',
       tag: 'CONCURRENCY'
     },
     workers: {
@@ -313,7 +313,7 @@ export const ArchitectureDeepDive: React.FC<ArchitectureDeepDiveProps> = ({ setV
                     <Terminal size={11} className="text-accent-teal" />
                     <span>6. Bounded Priority Queue</span>
                   </div>
-                  <div className="text-[8px] text-zinc-500 mt-1 font-mono">Capacity=5 &bull; Task Aging Active</div>
+                  <div className="text-[8px] text-zinc-500 mt-1 font-mono">Capacity=50 &bull; Task Aging Active</div>
                   {activeNode === 'queue' && <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-accent-teal rotate-45" />}
                 </button>
               </div>
