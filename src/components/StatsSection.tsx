@@ -4,8 +4,8 @@ import { resumeData } from '../data/resumeData';
 
 export const StatsSection: React.FC = () => {
   return (
-    <section className="py-12 border-y border-border-muted bg-bg-card/30 relative">
-      <div className="max-w-6xl mx-auto px-6">
+    <section className="py-12 border-b-2 border-border-muted bg-bg-card relative">
+      <div className="w-full px-6 md:px-12 xl:px-16">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
           {resumeData.stats.map((stat, index) => (
             <motion.div
@@ -14,24 +14,24 @@ export const StatsSection: React.FC = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-50px' }}
               transition={{ duration: 0.4, delay: index * 0.1 }}
-              whileHover={{ y: -4, borderColor: '#14b8a6' }}
-              className="p-6 rounded-none border border-border-muted bg-bg-dark/50 flex flex-col justify-center transition-all group relative overflow-hidden"
+              whileHover={{ y: -4, borderColor: 'var(--theme-accent)' }}
+              className="p-6 rounded-none border border-border-muted bg-bg-card flex flex-col justify-center transition-all group relative overflow-hidden"
             >
-              {/* Teal gradient glow on hover */}
+              {/* Sky blue gradient glow on hover */}
               <div className="absolute inset-0 bg-gradient-to-br from-accent-teal/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
               
-              <div className="font-mono text-3xl sm:text-4xl font-bold text-white tracking-tight flex items-baseline gap-1">
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-zinc-400">
+              <div className="font-mono text-3xl sm:text-4xl font-bold text-theme-text tracking-tight flex items-baseline gap-1">
+                <span>
                   {stat.value}
                 </span>
                 <span className="text-accent-teal text-lg">.</span>
               </div>
               
-              <div className="mt-2 text-sm font-semibold text-zinc-200 font-sans">
+              <div className="mt-2 text-sm font-semibold text-theme-text opacity-95 font-sans">
                 {stat.label}
               </div>
               
-              <div className="mt-1 text-xs text-zinc-500 font-mono">
+              <div className="mt-1 text-xs text-theme-text-muted font-mono">
                 {stat.subtext}
               </div>
             </motion.div>

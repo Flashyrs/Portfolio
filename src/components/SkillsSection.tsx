@@ -12,18 +12,18 @@ const categoryIcons: Record<string, React.ReactNode> = {
 
 export const SkillsSection: React.FC = () => {
   return (
-    <section id="skills" className="py-24 border-b border-border-muted relative">
-      <div className="max-w-6xl mx-auto px-6">
+    <section id="skills" className="py-24 border-b-2 border-border-muted relative">
+      <div className="w-full px-6 md:px-12 xl:px-16">
         
         {/* Section Heading */}
         <div className="mb-16">
           <div className="flex items-center gap-2 text-xs font-mono text-accent-teal mb-2">
             <span>03 // EXPERTISE</span>
           </div>
-          <h2 className="text-3xl font-bold text-white tracking-tight font-sans">
+          <h2 className="text-3xl font-bold text-theme-text tracking-tight font-sans">
             Technical Stack
           </h2>
-          <p className="mt-2 text-sm text-zinc-500 max-w-xl">
+          <p className="mt-2 text-sm text-theme-text-muted max-w-xl">
             My core technical toolset spans high-performance runtime environments, modern databases, cloud infrastructure, and low-latency systems design.
           </p>
         </div>
@@ -37,14 +37,14 @@ export const SkillsSection: React.FC = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-50px' }}
               transition={{ duration: 0.4, delay: index * 0.1 }}
-              className="p-6 rounded-none border border-border-muted bg-bg-card flex flex-col gap-6"
+              className="p-6 rounded-none border-2 border-border-muted bg-bg-card flex flex-col gap-6 shadow-brutalist"
             >
               {/* Category Header */}
               <div className="flex items-center gap-3 border-b border-border-muted/50 pb-4">
-                <div className="p-2 rounded-none bg-zinc-900 border border-border-muted">
+                <div className="p-2 rounded-none bg-bg-secondary border border-border-muted">
                   {categoryIcons[skillCat.category] || <Terminal size={18} />}
                 </div>
-                <h3 className="font-mono text-sm font-bold text-white">
+                <h3 className="font-mono text-sm font-bold text-theme-text">
                   {skillCat.category}
                 </h3>
               </div>
@@ -54,8 +54,8 @@ export const SkillsSection: React.FC = () => {
                 {skillCat.skills.map((skill, skillIdx) => (
                   <motion.span
                     key={skillIdx}
-                    whileHover={{ scale: 1.03, borderColor: '#14b8a6', color: '#f4f4f5' }}
-                    className="px-3.5 py-1.5 rounded-none border border-border-muted/70 bg-bg-dark/60 font-mono text-xs text-zinc-400 cursor-default transition-colors flex items-center gap-1.5"
+                    whileHover={{ scale: 1.03, borderColor: 'var(--theme-accent)' }}
+                    className="px-3.5 py-1.5 rounded-none border border-border-muted bg-accent-light font-mono text-xs text-theme-text font-bold cursor-default transition-all flex items-center gap-1.5"
                   >
                     <span className="w-1 h-1 rounded-none bg-accent-teal" />
                     <span>{skill}</span>

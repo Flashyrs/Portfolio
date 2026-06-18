@@ -62,7 +62,7 @@ export interface ResumeData {
 export const resumeData: ResumeData = {
   name: "Roshan Shukla",
   role: "Backend-focused Software Engineer",
-  location: "Bengaluru, Karnataka",
+  location: "Gorakhpur, Uttar Pradesh",
   email: "roshanshuklayt@gmail.com",
   phone: "+91 70072 92406",
   links: {

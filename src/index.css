@@ -1,23 +1,44 @@
 @import "tailwindcss";
 
 :root {
-  --theme-bg: #1c1917;
-  --theme-text: #d6d3d1;
-  --theme-accent: #d97706;
-  --theme-accent-hover: #f59e0b;
-  --theme-accent-dark: #b45309;
-  --theme-bg-card: #292524;
-  --theme-border-muted: #383533;
-  --theme-grid-dot: rgba(217, 119, 6, 0.04);
+  --theme-bg: #f9f8f6; /* Warm alabaster/paper - soothing off-white */
+  --theme-bg-secondary: #f0ede9; /* Soft sand gray */
+  --theme-bg-card: #faf9f6; /* Off-white card */
+  --theme-text: #1c1917; /* Warm charcoal/dark stone */
+  --theme-text-muted: #57534e; /* Soft stone gray */
+  --theme-accent: #0284c7; 
+  --theme-accent-light: #f0f7fc; 
+  --theme-accent-hover: #0369a1;
+  --theme-accent-dark: #075985;
+  --theme-border-muted: #1c1917; 
+  --theme-grid-dot: rgba(28, 25, 23, 0.05);
+}
+
+:root.dark {
+  --theme-bg: #09090b;
+  --theme-bg-secondary: #18181b;
+  --theme-bg-card: #09090b;
+  --theme-text: #f4f4f5;
+  --theme-text-muted: #a1a1aa;
+  --theme-accent: #38bdf8;
+  --theme-accent-light: #082f49;
+  --theme-accent-hover: #7dd3fc;
+  --theme-accent-dark: #0284c7;
+  --theme-border-muted: #f4f4f5;
+  --theme-grid-dot: rgba(255, 255, 255, 0.05);
 }
 
 @theme {
   --color-accent-teal: var(--theme-accent);
   --color-accent-teal-hover: var(--theme-accent-hover);
   --color-accent-teal-dark: var(--theme-accent-dark);
+  --color-accent-light: var(--theme-accent-light);
   --color-bg-dark: var(--theme-bg);
   --color-bg-card: var(--theme-bg-card);
+  --color-bg-secondary: var(--theme-bg-secondary);
   --color-border-muted: var(--theme-border-muted);
+  --color-theme-text: var(--theme-text);
+  --color-theme-text-muted: var(--theme-text-muted);
   
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
@@ -33,9 +54,10 @@ body {
   color: var(--theme-text);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   overflow-x: hidden;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Premium scrollbar matching the teal/dark theme */
+/* Premium scrollbar matching the sky blue/dark theme */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -47,7 +69,18 @@ body {
   background: var(--theme-border-muted);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--theme-accent); /* Dynamic accent scrollbar indicator on hover */
+  background: var(--theme-accent);
+}
+
+/* Brutalist drop shadow helper utilities */
+.shadow-brutalist {
+  box-shadow: 4px 4px 0px 0px var(--theme-border-muted);
+}
+.shadow-brutalist-sm {
+  box-shadow: 2px 2px 0px 0px var(--theme-border-muted);
+}
+.shadow-brutalist-lg {
+  box-shadow: 6px 6px 0px 0px var(--theme-border-muted);
 }
 
 /* Fade-in animation class helper */

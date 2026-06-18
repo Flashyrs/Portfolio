@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowUpRight, Terminal as TerminalIcon } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { resumeData } from '../data/resumeData';
 
 const GithubIcon: React.FC<{ size?: number; className?: string }> = ({ size = 18, className }) => (
@@ -52,12 +52,8 @@ const LeetcodeIcon: React.FC<{ size?: number; className?: string }> = ({ size = 
 
 export const HeroSection: React.FC = () => {
   return (
-    <section className="relative min-h-screen pt-24 pb-16 flex flex-col justify-center bg-grid-dots overflow-hidden">
-      {/* Absolute Ambient Teal Glow */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent-teal/5 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent-teal-dark/3 rounded-full blur-[120px] pointer-events-none" />
-
-      <div className="max-w-6xl mx-auto px-6 w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
+    <section className="relative min-h-[80vh] flex flex-col justify-center bg-grid-dots overflow-hidden">
+      <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
         
         {/* Typographical Profile Info */}
         <div className="lg:col-span-7 flex flex-col justify-center">
@@ -68,13 +64,13 @@ export const HeroSection: React.FC = () => {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-none border border-accent-teal/30 bg-accent-teal/5 text-xs font-mono text-accent-teal"
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-none border-2 border-border-muted bg-bg-card text-xs font-mono text-theme-text shadow-brutalist-sm"
             >
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-teal opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-accent-teal"></span>
               </span>
-              <span>Seeking Full-time SDE Roles</span>
+              <span className="font-bold">Seeking Full-time SDE Roles</span>
             </motion.div>
           </div>
 
@@ -83,25 +79,25 @@ export const HeroSection: React.FC = () => {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.05 }}
-            className="text-xs uppercase tracking-widest font-mono text-zinc-500 mb-2"
+            className="text-xs uppercase tracking-widest font-mono text-theme-text-muted mb-2"
           >
-            Hi, I'm <span className="text-zinc-300 font-semibold">{resumeData.name}</span>
+            Hi, I'm <span className="text-theme-text font-bold">{resumeData.name}</span>
           </motion.div>
 
           <motion.h1
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white leading-tight font-sans"
+            className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-theme-text leading-tight font-sans"
           >
-            I architect high-performance <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-teal to-accent-teal-hover">backend</span> systems.
+            I architect high-performance <span className="underline decoration-2 decoration-accent-teal">backend</span> systems.
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="mt-6 text-base sm:text-lg text-zinc-400 max-w-xl leading-relaxed font-sans"
+            className="mt-6 text-base sm:text-lg text-theme-text-muted leading-relaxed font-sans"
           >
             {resumeData.about}
           </motion.p>
@@ -117,37 +113,37 @@ export const HeroSection: React.FC = () => {
               href={resumeData.links.linkedin}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-sm font-medium text-zinc-300 hover:text-accent-teal transition-colors group"
+              className="flex items-center gap-2 text-sm font-bold text-theme-text hover:text-accent-teal transition-all group"
             >
-              <LinkedinIcon size={18} className="group-hover:text-accent-teal transition-colors" />
+              <LinkedinIcon size={18} />
               <span>LinkedIn</span>
-              <ArrowUpRight size={14} className="text-zinc-500 group-hover:text-accent-teal transition-colors" />
+              <ArrowUpRight size={14} className="text-theme-text-muted group-hover:text-accent-teal" />
             </a>
 
-            <span className="w-1.5 h-1.5 bg-zinc-700 hidden sm:inline" />
+            <span className="w-1.5 h-1.5 bg-border-muted hidden sm:inline" />
 
             <a
               href={resumeData.links.github}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-sm font-medium text-zinc-300 hover:text-accent-teal transition-colors group"
+              className="flex items-center gap-2 text-sm font-bold text-theme-text hover:text-accent-teal transition-all group"
             >
-              <GithubIcon size={18} className="group-hover:text-accent-teal transition-colors" />
+              <GithubIcon size={18} />
               <span>GitHub</span>
-              <ArrowUpRight size={14} className="text-zinc-500 group-hover:text-accent-teal transition-colors" />
+              <ArrowUpRight size={14} className="text-theme-text-muted group-hover:text-accent-teal" />
             </a>
 
-            <span className="w-1.5 h-1.5 bg-zinc-700 hidden sm:inline" />
+            <span className="w-1.5 h-1.5 bg-border-muted hidden sm:inline" />
 
             <a
               href={resumeData.links.leetcode}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-sm font-medium text-zinc-300 hover:text-accent-teal transition-colors group"
+              className="flex items-center gap-2 text-sm font-bold text-theme-text hover:text-accent-teal transition-all group"
             >
-              <LeetcodeIcon size={18} className="text-zinc-300 group-hover:text-accent-teal transition-colors" />
+              <LeetcodeIcon size={18} />
               <span>LeetCode</span>
-              <ArrowUpRight size={14} className="text-zinc-500 group-hover:text-accent-teal transition-colors" />
+              <ArrowUpRight size={14} className="text-theme-text-muted group-hover:text-accent-teal" />
             </a>
           </motion.div>
         </div>
@@ -158,65 +154,68 @@ export const HeroSection: React.FC = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="rounded-none border border-border-muted bg-bg-card shadow-2xl overflow-hidden font-mono text-xs text-zinc-300 w-full max-w-md mx-auto"
+            className="rounded-none border-2 border-border-muted bg-[#0d0e12] shadow-brutalist-lg overflow-hidden font-mono text-xs text-zinc-300 w-full max-w-md mx-auto"
           >
             {/* Terminal Header */}
-            <div className="flex items-center justify-between px-4 py-3 bg-zinc-900 border-b border-border-muted">
-              {/* Window dots remain circles for standard console styling */}
-              <div className="flex gap-2">
-                <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
-                <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
-                <div className="w-3 h-3 rounded-full bg-[#27c93f]" />
+            <div className="flex items-center justify-between px-4 py-3 bg-[#13151b] border-b border-[#1f2026]">
+              <div className="flex items-center gap-1.5">
+                <span className="h-3 w-3 rounded-full bg-[#ff5f56]" />
+                <span className="h-3 w-3 rounded-full bg-[#ffbd2e]" />
+                <span className="h-3 w-3 rounded-full bg-[#27c93f]" />
+                <span className="ml-3 font-bold text-[10px]">
+                  <span className="text-[#27c93f]">bash</span>
+                  <span className="text-zinc-500"> - </span>
+                  <span className="text-[#ffbd2e]">system.sh</span>
+                </span>
               </div>
-              <div className="flex items-center gap-1.5 text-zinc-500">
-                <TerminalIcon size={12} />
-                <span>bash - system.sh</span>
+              <div className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-[#27c93f] animate-pulse" />
+                <span className="text-[10px] font-bold text-zinc-500 font-mono">HEALTH_CHECK</span>
               </div>
-              <div className="w-12" /> {/* spacer */}
             </div>
 
             {/* Terminal Body */}
             <div className="p-5 space-y-4 leading-normal select-none">
               <div>
-                <span className="text-accent-teal">guest@roshanshukla</span>
+                <span className="text-[#27c93f] font-bold">guest@roshanshukla</span>
                 <span className="text-zinc-500">:</span>
-                <span className="text-accent-teal-dark">~</span>
-                <span className="text-zinc-100">$</span>{' '}
-                <span className="text-zinc-200">curl -s https://api.roshan.shukla/health</span>
+                <span className="text-[#ffbd2e] font-bold">~</span>
+                <span className="text-zinc-400 font-bold">$</span>{' '}
+                <span className="text-[#38bdf8]">curl</span> <span className="text-zinc-100">-s https://api.roshan.shukla/health</span>
               </div>
-              <div className="text-zinc-500 bg-zinc-950/40 p-3 border border-border-muted/30 rounded-none">
-                <pre className="text-accent-teal overflow-x-auto whitespace-pre">
-{`{
-  "status": "seeking_sde_roles",
-  "uptime": "99.99%",
-  "active_stack": ["Java", "Spring Boot", "Redis"],
-  "focus": "Backend Systems"
-}`}
+              <div className="text-zinc-300 bg-[#13151b] p-3 border border-[#1f2026] rounded-none">
+                <pre className="overflow-x-auto whitespace-pre font-bold">
+                  <span className="text-zinc-400">{'{'}</span>{"\n"}
+                  {"  "}<span className="text-[#9cdcfe]">"status"</span><span className="text-zinc-400">:</span> <span className="text-[#ce9178]">"seeking_sde_roles"</span><span className="text-zinc-400">,</span>{"\n"}
+                  {"  "}<span className="text-[#9cdcfe]">"uptime"</span><span className="text-zinc-400">:</span> <span className="text-[#ce9178]">"99.99%"</span><span className="text-zinc-400">,</span>{"\n"}
+                  {"  "}<span className="text-[#9cdcfe]">"active_stack"</span><span className="text-zinc-400">:</span> <span className="text-zinc-400">[</span><span className="text-[#ce9178]">"Java"</span><span className="text-zinc-400">,</span> <span className="text-[#ce9178]">"Spring Boot"</span><span className="text-zinc-400">,</span> <span className="text-[#ce9178]">"Redis"</span><span className="text-zinc-400">]</span><span className="text-zinc-400">,</span>{"\n"}
+                  {"  "}<span className="text-[#9cdcfe]">"focus"</span><span className="text-zinc-400">:</span> <span className="text-[#ce9178]">"Backend Systems"</span>{"\n"}
+                  <span className="text-zinc-400">{'}'}</span>
                 </pre>
               </div>
 
               <div className="pt-2">
-                <span className="text-accent-teal">guest@roshanshukla</span>
+                <span className="text-[#27c93f] font-bold">guest@roshanshukla</span>
                 <span className="text-zinc-500">:</span>
-                <span className="text-accent-teal-dark">~</span>
-                <span className="text-zinc-100">$</span>{' '}
-                <span className="text-zinc-200">cat current_metrics.json</span>
+                <span className="text-[#ffbd2e] font-bold">~</span>
+                <span className="text-zinc-400 font-bold">$</span>{' '}
+                <span className="text-[#38bdf8]">cat</span> <span className="text-zinc-100">current_metrics.json</span>
               </div>
-              <div className="text-zinc-500 bg-zinc-950/40 p-3 border border-border-muted/30 rounded-none">
-                <pre className="text-zinc-400 overflow-x-auto whitespace-pre">
-{`{
-  "L1_L2_semantic_cache": {
-    "hit_rate": "61%",
-    "p99_latency": "213ms"
-  },
-  "event_driven_pipeline": {
-    "throughput_multiplier": "250%"
-  }
-}`}
+              <div className="text-zinc-300 bg-[#13151b] p-3 border border-[#1f2026] rounded-none">
+                <pre className="overflow-x-auto whitespace-pre font-bold">
+                  <span className="text-zinc-400">{'{'}</span>{"\n"}
+                  {"  "}<span className="text-[#9cdcfe]">"L1_L2_semantic_cache"</span><span className="text-zinc-400">:</span> <span className="text-zinc-400">{'{'}</span>{"\n"}
+                  {"    "}<span className="text-[#9cdcfe]">"hit_rate"</span><span className="text-zinc-400">:</span> <span className="text-[#ce9178]">"61%"</span><span className="text-zinc-400">,</span>{"\n"}
+                  {"    "}<span className="text-[#9cdcfe]">"p99_latency"</span><span className="text-zinc-400">:</span> <span className="text-[#ce9178]">"213ms"</span>{"\n"}
+                  {"  "}<span className="text-zinc-400">{'}'}</span><span className="text-zinc-400">,</span>{"\n"}
+                  {"  "}<span className="text-[#9cdcfe]">"event_driven_pipeline"</span><span className="text-zinc-400">:</span> <span className="text-zinc-400">{'{'}</span>{"\n"}
+                  {"    "}<span className="text-[#9cdcfe]">"throughput_multiplier"</span><span className="text-zinc-400">:</span> <span className="text-[#ce9178]">"250%"</span>{"\n"}
+                  {"  "}<span className="text-zinc-400">{'}'}</span>{"\n"}
+                  <span className="text-zinc-400">{'}'}</span>
                 </pre>
               </div>
 
-              <div className="flex items-center gap-1 text-zinc-500 pt-2 animate-pulse">
+              <div className="flex items-center gap-1 text-zinc-500 pt-2 animate-pulse font-bold">
                 <span>&gt; Cursor active...</span>
                 <span className="w-1.5 h-3 bg-zinc-400 inline-block" />
               </div>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ExternalLink, Code2, ArrowUpRight } from 'lucide-react';
+import { ExternalLink, Code2, ArrowUpRight, Play, Terminal } from 'lucide-react';
 import { resumeData } from '../data/resumeData';
 
 const GithubIcon: React.FC<{ size?: number; className?: string }> = ({ size = 18, className }) => (
@@ -20,20 +20,25 @@ const GithubIcon: React.FC<{ size?: number; className?: string }> = ({ size = 18
   </svg>
 );
 
-export const ProjectsSection: React.FC = () => {
+interface ProjectsSectionProps {
+  activeSim: 'none' | 'symptomwise' | 'reddit' | 'both';
+  setActiveSim: (val: 'none' | 'symptomwise' | 'reddit' | 'both') => void;
+}
+
+export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ activeSim, setActiveSim }) => {
   return (
-    <section id="projects" className="py-24 border-b border-border-muted relative bg-bg-card/10">
-      <div className="max-w-6xl mx-auto px-6">
+    <section id="projects" className="py-24 border-b-2 border-border-muted relative bg-bg-card/30">
+      <div className="w-full px-6 md:px-12 xl:px-16">
         
         {/* Section Heading */}
         <div className="mb-16">
           <div className="flex items-center gap-2 text-xs font-mono text-accent-teal mb-2">
             <span>02 // PORTFOLIO</span>
           </div>
-          <h2 className="text-3xl font-bold text-white tracking-tight font-sans">
+          <h2 className="text-3xl font-bold text-theme-text tracking-tight font-sans">
             Technical Projects
           </h2>
-          <p className="mt-2 text-sm text-zinc-500 max-w-xl">
+          <p className="mt-2 text-sm text-theme-text-muted max-w-xl">
             Selected engineering projects demonstrating system design, database optimization, and high-performance backend services.
           </p>
         </div>
@@ -47,12 +52,12 @@ export const ProjectsSection: React.FC = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-50px' }}
               transition={{ duration: 0.5, delay: index * 0.15 }}
-              className="group rounded-none border border-border-muted bg-bg-card flex flex-col justify-between overflow-hidden hover:border-accent-teal/60 transition-colors"
+              className="group rounded-none border-2 border-border-muted bg-bg-card flex flex-col justify-between overflow-hidden shadow-brutalist hover:scale-[1.01] transition-all"
             >
               {/* Card Content */}
               <div className="p-6 sm:p-8 space-y-6">
                 <div className="flex items-start justify-between">
-                  <div className="p-2.5 rounded-none bg-zinc-900 border border-border-muted text-accent-teal group-hover:text-white transition-colors">
+                  <div className="p-2.5 rounded-none bg-bg-secondary border border-border-muted text-accent-teal group-hover:text-accent-teal transition-colors">
                     <Code2 size={20} />
                   </div>
                   
@@ -62,7 +67,7 @@ export const ProjectsSection: React.FC = () => {
                       href={project.githubUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-zinc-500 hover:text-white transition-colors"
+                      className="text-theme-text-muted hover:text-accent-teal transition-colors"
                       title="View GitHub Repository"
                     >
                       <GithubIcon size={18} />
@@ -72,7 +77,7 @@ export const ProjectsSection: React.FC = () => {
                         href={project.demoUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-zinc-500 hover:text-white transition-colors"
+                        className="text-theme-text-muted hover:text-accent-teal transition-colors"
                         title="View Live Demo"
                       >
                         <ExternalLink size={18} />
@@ -82,10 +87,10 @@ export const ProjectsSection: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <h3 className="text-xl font-bold text-white group-hover:text-accent-teal transition-colors font-sans">
+                  <h3 className="text-xl font-bold text-theme-text group-hover:text-accent-teal transition-colors font-sans">
                     {project.title}
                   </h3>
-                  <p className="text-sm text-zinc-400 leading-relaxed font-sans">
+                  <p className="text-sm text-theme-text-muted leading-relaxed font-sans">
                     {project.summary}
                   </p>
                 </div>
@@ -95,7 +100,7 @@ export const ProjectsSection: React.FC = () => {
                   {project.stack.map((tech, techIdx) => (
                     <span
                       key={techIdx}
-                      className="px-2.5 py-1 rounded-none bg-zinc-900/80 border border-border-muted/60 font-mono text-[10px] font-medium text-zinc-400 group-hover:text-zinc-300 transition-colors"
+                      className="px-2.5 py-1 rounded-none bg-accent-light border border-border-muted/30 font-mono text-[10px] font-medium text-theme-text group-hover:border-border-muted/60 transition-colors"
                     >
                       {tech}
                     </span>
@@ -104,22 +109,56 @@ export const ProjectsSection: React.FC = () => {
 
                 {/* Technical Achievements list */}
                 <div className="space-y-3 pt-2">
-                  <h4 className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">
+                  <h4 className="text-[10px] font-mono text-theme-text-muted uppercase tracking-wider">
                     Key Technical Achievements
                   </h4>
                   <ul className="space-y-2.5">
                     {project.bullets.map((bullet, bulletIdx) => (
-                      <li key={bulletIdx} className="text-xs text-zinc-400 leading-relaxed flex items-start gap-2.5 font-sans">
+                      <li key={bulletIdx} className="text-xs text-theme-text-muted leading-relaxed flex items-start gap-2.5 font-sans">
                         <span className="w-1.5 h-1.5 rounded-none bg-accent-teal shrink-0 mt-1.5" />
                         <span>{bullet}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
+
+                {/* Collapsible Gen-AI Pipeline Simulator */}
+                {project.title.toLowerCase().includes('reddit') && (
+                  <div className="pt-6 border-t-2 border-border-muted/20 space-y-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        <Terminal size={14} className="text-accent-teal" />
+                        <span className="text-[10px] font-mono font-bold text-theme-text uppercase tracking-wider">
+                          Interactive Ingestion Pipeline
+                        </span>
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          const isOpened = activeSim === 'reddit' || activeSim === 'both';
+                          setActiveSim(isOpened ? 'none' : 'reddit');
+                          if (!isOpened) {
+                            setTimeout(() => {
+                              document.getElementById('simulator-workspace')?.scrollIntoView({ behavior: 'smooth' });
+                            }, 120);
+                          }
+                        }}
+                        className={`px-3 py-1.5 rounded-none font-mono text-[10px] font-bold border-2 transition-all cursor-pointer outline-none flex items-center gap-1.5 shadow-brutalist-sm active:scale-95 ${
+                          (activeSim === 'reddit' || activeSim === 'both')
+                            ? 'bg-theme-text text-bg-dark border-border-muted'
+                            : 'bg-accent-light text-theme-text border-border-muted hover:bg-accent-teal hover:text-white'
+                        }`}
+                      >
+                        <Play size={10} fill={(activeSim === 'reddit' || activeSim === 'both') ? 'none' : 'currentColor'} />
+                        <span>{(activeSim === 'reddit' || activeSim === 'both') ? 'Close Workspace' : 'Launch Simulator'}</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Card Footer Decorator */}
-              <div className="h-1 w-full bg-gradient-to-r from-accent-teal to-accent-teal-dark opacity-10 group-hover:opacity-100 transition-opacity" />
+              <div className="h-1 w-full bg-accent-teal opacity-20 group-hover:opacity-100 transition-opacity" />
             </motion.div>
           ))}
 
@@ -129,13 +168,13 @@ export const ProjectsSection: React.FC = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="lg:col-span-2 p-6 sm:p-8 rounded-none border border-dashed border-border-muted hover:border-accent-teal/40 transition-colors bg-bg-card/40 flex flex-col sm:flex-row justify-between items-center gap-6"
+            className="lg:col-span-2 p-6 sm:p-8 rounded-none border border-dashed border-border-muted hover:border-accent-teal/40 transition-colors bg-bg-card/40 flex flex-col sm:flex-row justify-between items-center gap-6 shadow-brutalist-sm"
           >
             <div className="space-y-1.5 text-center sm:text-left">
-              <h3 className="text-lg font-bold text-white font-sans">
+              <h3 className="text-lg font-bold text-theme-text font-sans">
                 Looking for more of my work?
               </h3>
-              <p className="text-xs text-zinc-400 font-sans max-w-xl leading-relaxed">
+              <p className="text-xs text-theme-text-muted font-sans max-w-xl leading-relaxed">
                 I maintain multiple other open-source repositories covering data structures, algorithm implementations, and backend system utilities.
               </p>
             </div>
@@ -143,7 +182,7 @@ export const ProjectsSection: React.FC = () => {
               href={resumeData.links.github}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 px-5 py-2.5 rounded-none bg-accent-teal hover:bg-accent-teal-hover text-xs font-bold text-zinc-950 transition-all active:scale-95 shrink-0"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-none bg-theme-text hover:opacity-90 text-bg-dark border-2 border-border-muted text-xs font-bold transition-all active:scale-95 shadow-brutalist-sm"
             >
               <GithubIcon size={14} />
               <span>Explore My GitHub Repos</span>
