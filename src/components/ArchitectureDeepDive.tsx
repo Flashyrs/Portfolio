@@ -153,7 +153,7 @@ export const ArchitectureDeepDive: React.FC<ArchitectureDeepDiveProps> = ({ setV
     },
     {
       title: 'Inference Infrastructure: GPU CUDA vs CPU Thread Pools',
-      details: 'Running deep learning inference locally on client devices or budget cloud GPU boxes (RTX 3050, 8GB VRAM) requires careful memory bounds. Quantized models (GGUF 4-bit) limit VRAM footprint to 4.2GB, leaving buffer space. To prevent CUDA memory bottlenecks, the worker thread pool count was capped at 2. An automated failover routes traffic to a Python CPU thread pool if VRAM crosses 90%.',
+      details: 'Running deep learning inference locally on client devices or budget cloud GPU boxes (RTX 3050, 6GB VRAM) requires careful memory bounds. Quantized models (GGUF 4-bit) limit VRAM footprint to 4.2GB, leaving buffer space. To prevent CUDA memory bottlenecks, the worker thread pool count was capped at 2. An automated failover routes traffic to a Python CPU thread pool if VRAM crosses 90%.',
       impact: '100% service uptime during synthetic surges, with CPU failovers handling traffic overflows at a 4.5x latency penalty.'
     }
   ];
