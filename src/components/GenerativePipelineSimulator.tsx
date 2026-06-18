@@ -35,9 +35,15 @@ export const GenerativePipelineSimulator: React.FC = () => {
   const [syncTime, setSyncTime] = useState(0);
 
   const logContainerRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const animationRef = useRef<number | null>(null);
+  const videoBackgroundRef = useRef(videoBackground);
 
-  // Auto-scroll logs (Direct scroll modification to avoid scrolling the main page window)
+  // Sync background state changes to mutable ref immediately
+  useEffect(() => {
+    videoBackgroundRef.current = videoBackground;
+  }, [videoBackground]);
+
+  // Direct container scroll to prevent window-level browser page scrolling
   useEffect(() => {
     if (logContainerRef.current) {
       logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
@@ -55,15 +61,26 @@ export const GenerativePipelineSimulator: React.FC = () => {
     setVram(currentVram);
   }, [activeStage, voiceAccel, whisperModel, ffmpegAccel, pipelineState]);
 
-  // Dynamic canvas background loop (Subway Surfers vs Minecraft Parkour)
+  // Clean up animation loop if component is unmounted
   useEffect(() => {
-    if (pipelineState !== 'success') return;
-    const canvas = canvasRef.current;
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, []);
+
+  // Callback ref is triggered whenever the canvas DOM node is mounted or unmounted,
+  // bypassing the race conditions of AnimatePresence exit animations.
+  const canvasCallbackRef = (canvas: HTMLCanvasElement | null) => {
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+      animationRef.current = null;
+    }
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let animationFrameId: number;
     let frameCount = 0;
 
     // --- Subway Surfers State Variables ---
@@ -91,9 +108,10 @@ export const GenerativePipelineSimulator: React.FC = () => {
       frameCount++;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      if (videoBackground === 'surfers') {
+      const currentBg = videoBackgroundRef.current;
+
+      if (currentBg === 'surfers') {
         // --- DRAW SUBWAY SURFERS ---
-        // Sky gradient
         const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
         skyGrad.addColorStop(0, '#0f172a');
         skyGrad.addColorStop(0.35, '#1e1b4b');
@@ -102,11 +120,9 @@ export const GenerativePipelineSimulator: React.FC = () => {
         ctx.fillStyle = skyGrad;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Center horizon point
         const hX = canvas.width / 2;
         const hY = canvas.height * 0.4;
 
-        // Tracks (converging lines)
         ctx.strokeStyle = '#475569';
         ctx.lineWidth = 1.5;
         const lanes = [-1, 0, 1];
@@ -117,7 +133,6 @@ export const GenerativePipelineSimulator: React.FC = () => {
           ctx.stroke();
         });
 
-        // Rails sleepers sliding down
         trackOffset += 3.5;
         if (trackOffset >= 30) trackOffset = 0;
         ctx.strokeStyle = '#334155';
@@ -132,12 +147,11 @@ export const GenerativePipelineSimulator: React.FC = () => {
           ctx.stroke();
         }
 
-        // Draw trains/obstacles
         trainObstacles.forEach((obs) => {
           obs.z -= 4;
           if (obs.z <= 0) {
             obs.z = 250;
-            obs.lane = Math.floor(Math.random() * 3) - 1; // pick new random lane
+            obs.lane = Math.floor(Math.random() * 3) - 1;
           }
 
           const scale = (250 - obs.z) / 250;
@@ -150,20 +164,17 @@ export const GenerativePipelineSimulator: React.FC = () => {
             ctx.fillStyle = obs.color;
             ctx.fillRect(x - trainW / 2, y - trainH, trainW, trainH);
 
-            // Windows on train
             ctx.fillStyle = '#fef08a';
             ctx.fillRect(x - trainW * 0.3, y - trainH * 0.7, trainW * 0.2, trainH * 0.2);
             ctx.fillRect(x + trainW * 0.1, y - trainH * 0.7, trainW * 0.2, trainH * 0.2);
           }
         });
 
-        // Lane swapping trigger
         if (frameCount % 70 === 0) {
           surferTargetX = (Math.floor(Math.random() * 3) - 1) * 25;
         }
         surferX += (surferTargetX - surferX) * 0.12;
 
-        // Jump physics trigger
         if (frameCount % 85 === 0 && surferJumpTicks === 0) {
           surferJumpTicks = 24;
         }
@@ -174,44 +185,37 @@ export const GenerativePipelineSimulator: React.FC = () => {
           surferY = 0;
         }
 
-        // Draw surfer player
         const pX = hX + surferX;
         const pY = canvas.height * 0.85 - surferY;
 
-        // Board shadow / Board
         ctx.fillStyle = '#facc15';
         ctx.beginPath();
         ctx.ellipse(pX, pY + 3, 8, 2.5, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        // Surfer stick figure
         ctx.fillStyle = '#10b981';
         ctx.beginPath();
-        ctx.arc(pX, pY - 12, 4, 0, Math.PI * 2); // Head
+        ctx.arc(pX, pY - 12, 4, 0, Math.PI * 2);
         ctx.fill();
         ctx.fillStyle = '#f43f5e';
-        ctx.fillRect(pX - 2.5, pY - 8, 5, 8); // Shirt
+        ctx.fillRect(pX - 2.5, pY - 8, 5, 8);
         ctx.fillStyle = '#1e293b';
-        ctx.fillRect(pX - 2, pY, 4, 3); // Pants/Legs
+        ctx.fillRect(pX - 2, pY, 4, 3);
 
       } else {
         // --- DRAW MINECRAFT PARKOUR ---
-        // Sky
         ctx.fillStyle = '#0ea5e9';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Sun & clouds
         ctx.fillStyle = '#fef08a';
         ctx.fillRect(15, 15, 12, 12);
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(35, 25, 25, 6);
         ctx.fillRect(8, 45, 30, 8);
 
-        // Converging horizon
         const hX = canvas.width / 2;
         const hY = canvas.height * 0.55;
 
-        // Grass/Dirt blocks sliding down
         mcBlocks.forEach((block) => {
           block.z -= 2.5;
           if (block.z <= 0) {
@@ -226,39 +230,34 @@ export const GenerativePipelineSimulator: React.FC = () => {
           const bw = 35 * scale;
           const bh = 35 * scale;
 
-          // Dirt bottom
           ctx.fillStyle = '#7c2d12';
           ctx.fillRect(x - bw / 2, y, bw, bh);
 
-          // Grass top
           ctx.fillStyle = '#22c55e';
           ctx.fillRect(x - bw / 2, y, bw, bh * 0.3);
 
-          // Grid wireframe look
           ctx.strokeStyle = '#15803d';
           ctx.lineWidth = 0.5;
           ctx.strokeRect(x - bw / 2, y, bw, bh);
         });
 
-        // Swinging block arm (lower right)
         const armSwing = Math.sin(frameCount * 0.12) * 3.5;
         const armX = canvas.width * 0.65 + armSwing;
         const armY = canvas.height * 0.75 + Math.abs(armSwing);
 
-        ctx.fillStyle = '#d97706'; // Skin
+        ctx.fillStyle = '#d97706';
         ctx.fillRect(armX, armY, 25, 45);
-        ctx.fillStyle = '#047857'; // Green sleeve
+        ctx.fillStyle = '#047857';
         ctx.fillRect(armX - 4, armY + 12, 12, 15);
 
-        // Holding a pickaxe/sword (simple block line)
-        ctx.strokeStyle = '#94a3b8'; // Iron blade
+        ctx.strokeStyle = '#94a3b8';
         ctx.lineWidth = 3.5;
         ctx.beginPath();
         ctx.moveTo(armX + 8, armY + 4);
         ctx.lineTo(armX - 6 - armSwing, armY - 12);
         ctx.stroke();
 
-        ctx.strokeStyle = '#78350f'; // Handle
+        ctx.strokeStyle = '#78350f';
         ctx.lineWidth = 2.5;
         ctx.beginPath();
         ctx.moveTo(armX + 6, armY + 6);
@@ -266,15 +265,11 @@ export const GenerativePipelineSimulator: React.FC = () => {
         ctx.stroke();
       }
 
-      animationFrameId = requestAnimationFrame(draw);
+      animationRef.current = requestAnimationFrame(draw);
     };
 
     draw();
-
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-    };
-  }, [pipelineState, videoBackground]);
+  };
 
   const addLog = (text: string, type: LogLine['type'] = 'info') => {
     setLogs((prev) => [...prev, { text, type }]);
@@ -736,7 +731,7 @@ export const GenerativePipelineSimulator: React.FC = () => {
                   
                   {/* Canvas for dynamic video backdrop gameplay loop */}
                   <canvas 
-                    ref={canvasRef} 
+                    ref={canvasCallbackRef} 
                     width={130} 
                     height={220} 
                     className="absolute inset-0 z-0 w-full h-full object-cover" 
