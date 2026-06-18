@@ -98,11 +98,12 @@ export const resumeData: ResumeData = {
       company: "SymptomWise Pvt. Ltd.",
       role: "Founding Software Engineer",
       duration: "Oct 2025 - Jan 2026",
-      coreFocus: "Built the technical foundation for a multi-tenant healthcare AI assistant platform, implementing strict tenant isolation and advanced caching patterns.",
+      coreFocus: "Built a secure, logical multi-tenant healthcare AI assistant platform utilizing thread-local request contexts and resource-constrained LLM inference pipelines.",
       bullets: [
-        "Architected an L1/L2 semantic caching system for LLM inference pipelines utilizing Redis, driving a 61% cache hit rate and drastically cutting p99 latency from 1.2s down to 213ms.",
-        "Designed and decoupled an asynchronous request path to isolate GPU inference workloads from cache hits, eliminating resource contention and safeguarding low-latency execution under heavy concurrent traffic.",
-        "Bulletproofed system reliability by implementing semaphore-based load shedding and circuit breaker mechanisms, sustaining 99.9% availability during simulated 3x traffic spikes."
+        "Architected logical multi-tenancy at zero additional cloud cost by storing active tenant contexts in thread-local storage and overriding Django's ORM manager with a custom filter, preventing cross-tenant leaks.",
+        "Guarded local LLM inference under GPU/RAM constraints via a threaded worker pool and bounded dynamic priority queue featuring aging and intelligent load shedding to prevent VRAM crashes.",
+        "Engineered an in-memory two-tier cache (L1 exact match, L2 semantic symptom signature key format NEG/SEV/SYM) that bypassed the GPU for repeated queries, reducing latency to under 2ms.",
+        "Built a stateful WhatsApp triage state machine via Twilio, integrated with a regex-based multi-stage safety pipeline that instantly bypassed AI processing for emergency symptoms (score >= 5)."
       ],
       metrics: [
         { label: "Cache Hit Rate", value: "61%" },
@@ -146,23 +147,28 @@ export const resumeData: ResumeData = {
   projects: [
     {
       title: "IntervYou: Real-Time Collaborative Interview Platform",
-      stack: ["Next.js", "Node.js", "Redis Pub/Sub", "WebRTC", "Docker", "Judge0"],
+      stack: ["Next.js", "Supabase", "Yjs CRDT", "Monaco Editor", "WebRTC", "Prisma", "PostgreSQL", "Redis", "Judge0"],
       summary: "A production-grade collaborative workspace supporting concurrent code editing, secure multi-language code execution, and low-latency audio/video communication.",
       bullets: [
-        "Built a highly responsive real-time synchronization engine leveraging Redis Pub/Sub and Yjs CRDTs for collaborative editing, keeping p50 latency under 110ms across 50+ concurrent active sessions.",
-        "Guaranteed structural data integrity with CRDT-based state synchronization, achieving 0% message loss and seamless sub-1s state recovery for dropped/reconnecting clients.",
-        "Sandboxed untrusted multi-language code execution workflows using Docker containers and Judge0 across 20+ programming languages while enforcing strict host OS security isolation."
+        "Coordinated conflict-free live document editing in Monaco Editor using client-side Yjs CRDTs mapped over Supabase channels with cursor-throughput debouncing (<10 msgs/sec).",
+        "Established a dual-PeerConnection WebRTC topology for independent, dynamic bandwidth and congestion control allocations between webcam streams and high-resolution screen sharing.",
+        "Designed a two-tier state replication architecture utilizing Redis cache-aside storage (1s debounced writes, 24h TTL) and Postgres DB snapshots, combined with optimistic concurrency control.",
+        "Integrated Judge0 API code execution with 25-second AbortController timeout guards to execute untrusted code in secure sandboxes without locking Next.js API threads.",
+        "Constructed a custom Java reflection-based test harness compiler that polyfills JSON parsing, executing dynamic test suites in sandboxed environments with zero external dependencies."
       ],
       demoUrl: "https://interv-you.vercel.app/",
       githubUrl: "https://github.com/Flashyrs/intervYou"
     },
     {
-      title: "Automated Reddit to YouTube Content Pipeline",
-      stack: ["Python", "FFmpeg", "Whisper", "Bark TTS", "Telegram Bot API", "SQLite"],
+      title: "Automated Reddit Stories Generative AI Pipeline",
+      stack: ["Python", "PyTorch", "Whisper", "Bark TTS", "Gemini API", "Playwright", "FFmpeg", "Telegram Bot API"],
       summary: "An automated multimedia content production infrastructure that converts textual data streams into synchronized, narrated videos.",
       bullets: [
-        "Engineered an end-to-end Python automation workflow utilizing FFmpeg and OpenAI's Whisper to parse text, generate precise subtitle alignments, and render video assets, cutting manual editing overhead by 90%.",
-        "Designed a lightweight, SQLite-backed deduplication tracking engine to monitor processed raw assets, ensuring complete execution reliability while completely eliminating duplicate compute costs."
+        "Engineered a multi-stage Python automation pipeline using PyTorch for local voice synthesis (Suno Bark) and sub-word speech-to-text alignment (OpenAI Whisper).",
+        "Designed a dynamic GPU memory profiling system using GPUtil to monitor CUDA VRAM utilization and implement automated CPU fallback mechanisms during CUDA OOM exceptions.",
+        "Optimized deep learning inference runtime via a custom NLTK-tokenized text chunking parser (60-word limit) and audio speed scaling (1.3x) via raw buffer manipulations.",
+        "Implemented GPU-accelerated video rendering wrapping FFmpeg subprocesses with H.264 NVENC hardware encoding, vertical cropping (9:16), and dynamic SubStation Alpha subtitle overlays.",
+        "Built a remote telemetry control server using the Telegram Bot API and process heuristics (psutil) to trigger pipelines, toggle execution stages, and tail live log files."
       ],
       githubUrl: "https://github.com/Flashyrs/reddit-stories"
     }
