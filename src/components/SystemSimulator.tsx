@@ -100,7 +100,7 @@ export const SystemSimulator: React.FC = () => {
     if (index < 5) return 1500;
     if (index < 15) return 800;
     if (index < 45) return 400;
-    if (index < 75) return 80;   // Spike: Severe load surge! Queue will build up here.
+    if (index < 75) return 120;   // Spike: Severe load surge! Queue will build up here.
     return 300;                  // Draining phase
   };
 
@@ -207,8 +207,12 @@ export const SystemSimulator: React.FC = () => {
         });
       }
 
-      const baseVram = 70 + state.activeWorkers.length * 10;
-      const loadSpike = state.queue.length * 3;
+      // Caching optimizations (quantized KV-caching) reduce baseline VRAM footprint
+      const idleVram = cacheEnabled ? 50 : 70;
+      // 3 workers on a 6GB GPU exceeds limits and will lead to CUDA OOM
+      const workerVramCost = workersCount === 3 ? 20 : 10;
+      const baseVram = idleVram + state.activeWorkers.length * workerVramCost;
+      const loadSpike = state.queue.length * 2;
       state.vram = Math.min(100, baseVram + loadSpike);
 
       if (state.vram >= 100 && gameState === 'playing') {
@@ -260,41 +264,66 @@ export const SystemSimulator: React.FC = () => {
     if (queueAgingEnabled) score += 1;
     if (workersCount === 2) score += 1;
 
+    let baseLevel = "";
+    let baseTitle = "";
+    let baseDesc = "";
+
+    if (score === 4) {
+      baseLevel = "Level IV";
+      baseTitle = "Founding Systems Engineer";
+      baseDesc = "Perfect implementation! You enabled Caching, Triage, and Queue Aging with exactly 2 workers, achieving optimal average latency. This successfully replicates Roshan's actual systems work at SymptomWise—preventing VRAM OOMs and reducing latency via a 61% Cache Hit Rate and Twilio triage bypass!";
+    } else if (score >= 3) {
+      baseLevel = "Level III";
+      baseTitle = "Systems SDE-II";
+      baseDesc = "Excellent setup. You utilized Caching, Triage, and Queue Aging correctly to meet the SLA. Using more worker slots or slight delays placed you at a solid SDE-2 capacity.";
+    } else if (score === 2) {
+      baseLevel = "Level II";
+      baseTitle = "Systems SDE-I";
+      baseDesc = "Good configuration. You used caching/bypass to shield the GPU, but missing queue aging or optimal thread counts limits system throughput under severe traffic spikes.";
+    } else {
+      baseLevel = "Level I";
+      baseTitle = "Junior Developer";
+      baseDesc = "System passed, but the configuration is fragile! Spawning threads without queue aging, exact cache matches, or context boundaries is highly prone to production dropouts.";
+    }
+
+    if (gameState === 'crashed') {
+      if (crashReason === 'OOM') {
+        if (workersCount === 3) {
+          return {
+            level: "Crash - OOM",
+            title: "Naive Scaler (Brute Force SDE)",
+            description: "OOM Crash! You tried to run 3 parallel GPU workers on a local 6GB RTX 3050. Throwing more workers at a hardware bottleneck without sizing resource bounds is a classic systems engineering trap. Limit concurrent worker threads to exactly 2 to protect the physical VRAM limit!"
+          };
+        }
+        return {
+          level: `${baseLevel} (OOM)`,
+          title: `${baseTitle} (CUDA OOM)`,
+          description: `VRAM limit reached 100%! While your configuration aligned with ${baseLevel} standards, high concurrency crashed the RTX 3050. Reduce active worker threads or enable L1/L2 caching to shield the GPU.`
+        };
+      } else {
+        return {
+          level: `${baseLevel} (Queue Overflow)`,
+          title: `${baseTitle} (Queue Overflow)`,
+          description: `Backlog capacity of 50 requests exceeded! While your configuration aligned with ${baseLevel} standards, requests queued faster than they could be processed. Enable caching/bypass or optimize workers to drain requests.`
+        };
+      }
+    }
+
     const metSLA = avgLatency <= 180;
 
     if (!metSLA) {
       return {
-        level: "Unranked",
-        title: "SLA Violator",
-        description: `Your average latency was ${avgLatency}ms, exceeding the 180ms SLA target. The pipeline dropped requests or queued them too long. Tune your config (Caching, Triage Bypass, and Worker count) to lower latency!`
+        level: `${baseLevel} (SLA Violated)`,
+        title: `${baseTitle} (SLA Violator)`,
+        description: `Average latency was ${avgLatency}ms, exceeding the 180ms SLA. While your configuration aligned with ${baseLevel} standards, you need to further optimize cache hit rates, bypass rules, or queue aging to meet the response criteria.`
       };
     }
 
-    if (score === 4) {
-      return {
-        level: "Level IV - Maximum Rank",
-        title: "Founding Systems Engineer",
-        description: "Perfect implementation! You enabled Caching, Triage, and Queue Aging with exactly 2 workers, achieving optimal average latency. This successfully replicates Roshan's actual systems work at SymptomWise—preventing VRAM OOMs and reducing latency via a 61% Cache Hit Rate and Twilio triage bypass!"
-      };
-    } else if (score >= 3) {
-      return {
-        level: "Level III",
-        title: "Systems SDE-II",
-        description: "Excellent setup. You utilized Caching, Triage, and Queue Aging correctly to meet the SLA. Using more worker slots or slight delays placed you at a solid SDE-2 capacity."
-      };
-    } else if (score === 2) {
-      return {
-        level: "Level II",
-        title: "Systems SDE-I",
-        description: "Good configuration. You used caching/bypass to shield the GPU, but missing queue aging or optimal thread counts limits system throughput under severe traffic spikes."
-      };
-    } else {
-      return {
-        level: "Level I",
-        title: "Junior Developer",
-        description: "System passed, but the configuration is fragile! Spawning threads without queue aging, exact cache matches, or context boundaries is highly prone to production dropouts."
-      };
-    }
+    return {
+      level: baseLevel,
+      title: baseTitle,
+      description: baseDesc
+    };
   };
 
   const victoryRank = getVictoryRank();
@@ -422,24 +451,42 @@ export const SystemSimulator: React.FC = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="py-6 flex flex-col justify-center items-center text-center space-y-4"
+              className="py-4 space-y-4"
             >
-              <ShieldAlert size={44} className="text-red-500 animate-bounce" />
-              <div className="space-y-1">
+              <div className="flex flex-col items-center text-center space-y-2">
+                <ShieldAlert size={40} className="text-red-500 animate-bounce" />
                 <h3 className="text-red-500 font-extrabold text-sm uppercase">SYSTEM CRASHED</h3>
-                <p className="text-[11px] text-zinc-400 max-w-sm">
+                <p className="text-[10px] text-zinc-400">
                   {crashReason === 'OOM' 
                     ? 'CUDA Out-of-Memory (OOM)! VRAM reached 100% on the RTX 3050 GPU.' 
                     : 'Queue Overflow! Backlog capacity of 50 requests exceeded.'}
                 </p>
               </div>
-              <button
-                onClick={startBootPhase}
-                className="px-6 py-2.5 bg-red-950 text-red-200 hover:bg-red-900 border-2 border-red-800 rounded-none shadow-[3px_3px_0px_0px_#1f2026] transition-colors cursor-pointer outline-none flex items-center gap-2"
-              >
-                <RotateCcw size={12} />
-                <span>Reboot System</span>
-              </button>
+
+              <div className="border-2 border-[#1f2026] bg-[#13151b] p-4 rounded-none space-y-2 shadow-brutalist-sm">
+                <div className="flex justify-between items-center border-b border-zinc-800 pb-2">
+                  <span className="font-extrabold text-[10px] uppercase text-zinc-400">Performance Rank:</span>
+                  <span className="px-2 py-0.5 font-extrabold text-[9px] uppercase tracking-wider bg-red-950 text-red-200 border border-red-800">
+                    {victoryRank.level}
+                  </span>
+                </div>
+                <div className="text-zinc-100 font-black text-sm uppercase tracking-tight text-left">
+                  {victoryRank.title}
+                </div>
+                <div className="text-[10px] leading-relaxed text-zinc-400 font-sans font-medium text-left">
+                  {victoryRank.description}
+                </div>
+              </div>
+
+              <div className="flex justify-center">
+                <button
+                  onClick={startBootPhase}
+                  className="px-6 py-2.5 bg-red-950 text-red-200 hover:bg-red-900 border-2 border-red-800 rounded-none shadow-[3px_3px_0px_0px_#1f2026] transition-colors cursor-pointer outline-none flex items-center gap-2 text-xs"
+                >
+                  <RotateCcw size={12} />
+                  <span>Reboot System</span>
+                </button>
+              </div>
             </motion.div>
           )}
 
