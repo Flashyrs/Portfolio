@@ -92,24 +92,26 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({ activeSim,
                 </ul>
 
                 {/* Performance impact metrics grid (strictly rounded-none) */}
-                <div className="pt-6 border-t border-border-muted">
-                  <h4 className="text-xs font-mono text-theme-text-muted uppercase tracking-widest mb-4">
-                    Key Performance Metrics
-                  </h4>
-                  <div className="grid grid-cols-3 gap-4">
-                    {resumeData.experience[activeTab].metrics.map((metric, index) => (
-                      <div key={index} className="p-4 rounded-none border border-border-muted bg-bg-card flex flex-col justify-center shadow-brutalist-sm">
-                        <div className="font-mono text-lg sm:text-xl font-bold text-theme-text flex items-center gap-1">
-                          <Zap size={14} className="text-accent-teal" />
-                          <span>{metric.value}</span>
+                {resumeData.experience[activeTab].metrics.length > 0 && (
+                  <div className="pt-6 border-t border-border-muted">
+                    <h4 className="text-xs font-mono text-theme-text-muted uppercase tracking-widest mb-4">
+                      Key Performance Metrics
+                    </h4>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                      {resumeData.experience[activeTab].metrics.map((metric, index) => (
+                        <div key={index} className="p-4 rounded-none border border-border-muted bg-bg-card flex flex-col justify-center shadow-brutalist-sm">
+                          <div className="font-mono text-lg sm:text-xl font-bold text-theme-text flex items-center gap-1">
+                            <Zap size={14} className="text-accent-teal" />
+                            <span>{metric.value}</span>
+                          </div>
+                          <div className="mt-1 text-[10px] sm:text-xs font-medium text-theme-text-muted">
+                            {metric.label}
+                          </div>
                         </div>
-                        <div className="mt-1 text-[10px] sm:text-xs font-medium text-theme-text-muted">
-                          {metric.label}
-                        </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Conditional LLM Pipeline Simulator */}
                 {resumeData.experience[activeTab].company === "SymptomWise Pvt. Ltd." && (

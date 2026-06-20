@@ -83,9 +83,9 @@ export const resumeData: ResumeData = {
       subtext: "Top 8% globally"
     },
     {
-      value: "213ms",
+      value: "213ms / 1.53s",
       label: "p99 Latency",
-      subtext: "Down from 1.2s via L1/L2 Cache"
+      subtext: "Cached vs LLM Inference"
     },
     {
       value: "99.9%",
@@ -100,16 +100,14 @@ export const resumeData: ResumeData = {
       duration: "Oct 2025 - Jan 2026",
       coreFocus: "Built a secure, logical multi-tenant healthcare AI assistant platform utilizing thread-local request contexts and resource-constrained LLM inference pipelines.",
       bullets: [
-        "Architected logical multi-tenancy at zero additional cloud cost by storing active tenant contexts in thread-local storage and overriding Django's ORM manager with a custom filter, preventing cross-tenant leaks.",
+        "Architected logical multi-tenancy at zero additional cloud cost by storing active tenant contexts in thread-local storage and overriding Django's ORM manager query scopes to prevent cross-tenant leaks.",
+        "Designed a dual-path execution architecture combining semantic caching and LLM inference to reduce redundant inference workloads and optimize GPU compute paths.",
+        "Engineered an in-memory two-tier cache (L1 exact match, L2 semantic symptom signature key format NEG/SEV/SYM) to shield the GPU, shifting processing from heavy tensor mathematics to fast Redis lookups.",
+        "Built a stateful WhatsApp triage state machine (via Twilio) and webpage chatbot, integrated with deterministic safety triage scoring logic using regex pattern matching to route critical cases in under 5ms.",
         "Guarded local LLM inference under GPU/RAM constraints via a threaded worker pool and bounded dynamic priority queue featuring aging and intelligent load shedding to prevent VRAM crashes.",
-        "Engineered an in-memory two-tier cache (L1 exact match, L2 semantic symptom signature key format NEG/SEV/SYM) that bypassed the GPU for repeated queries, reducing latency to under 2ms.",
-        "Built a stateful WhatsApp triage state machine via Twilio, integrated with a regex-based multi-stage safety pipeline that instantly bypassed AI processing for emergency symptoms (score >= 5)."
+        "Load tested the platform under concurrent simulated spikes, verifying high availability, queue bounds, and automated CPU worker failovers under sustained throughput."
       ],
-      metrics: [
-        { label: "Cache Hit Rate", value: "61%" },
-        { label: "p99 Latency", value: "213ms" },
-        { label: "Availability", value: "99.9%" }
-      ]
+      metrics: []
     },
     {
       company: "GanakGyan Technologies",

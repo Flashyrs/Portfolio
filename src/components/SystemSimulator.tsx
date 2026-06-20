@@ -15,7 +15,29 @@ interface RequestItem {
   enqueueTime: number;
   completedTime?: number;
   processingTime?: number;
+  isCpu?: boolean;
+  source?: 'web' | 'whatsapp';
+  symptom?: string;
 }
+
+const SYMPTOMS_ROUTINE = [
+  "Mild headache in temples",
+  "Stuffy nose and mild cough",
+  "Slight lower back muscle strain",
+  "Dry itchy throat"
+];
+const SYMPTOMS_URGENT = [
+  "High fever of 103F with chills",
+  "Sharp lower right abdominal pain",
+  "Migraine with visual aura",
+  "Persistent vomiting for 12 hours"
+];
+const SYMPTOMS_EMERGENCY = [
+  "Crushing chest pain radiating to left arm",
+  "Sudden slurred speech and numbness",
+  "Severe shortness of breath and choking",
+  "Anaphylaxis airway closing"
+];
 
 export const SystemSimulator: React.FC = () => {
   const [gameState, setGameState] = useState<'idle' | 'booting' | 'playing' | 'crashed' | 'success'>('idle');
@@ -26,6 +48,7 @@ export const SystemSimulator: React.FC = () => {
   const [cacheEnabled, setCacheEnabled] = useState(false);
   const [triageBypassEnabled, setTriageBypassEnabled] = useState(false);
   const [queueAgingEnabled, setQueueAgingEnabled] = useState(false);
+  const [cpuFallbackEnabled, setCpuFallbackEnabled] = useState(true);
   const [workersCount, setWorkersCount] = useState<1 | 2 | 3>(1);
 
   const [renderStats, setRenderStats] = useState({
@@ -46,7 +69,8 @@ export const SystemSimulator: React.FC = () => {
     logs: [] as string[],
     requestIndex: 0,
     lastRequestTime: 0,
-    nextRequestDelay: 1500
+    nextRequestDelay: 1500,
+    cacheStore: new Set<string>()
   });
 
   const totalTarget = 100;
@@ -65,7 +89,8 @@ export const SystemSimulator: React.FC = () => {
       logs: ['[SYSTEM] Initializing LLM Inference Pipeline...', '[SYSTEM] Status: Bounded Queue capacity = 50. VRAM Limit = 100%'],
       requestIndex: 0,
       lastRequestTime: 0,
-      nextRequestDelay: 1500
+      nextRequestDelay: 1500,
+      cacheStore: new Set<string>()
     };
 
     setRenderStats({
@@ -118,10 +143,15 @@ export const SystemSimulator: React.FC = () => {
       if (completed.length > 0) {
         completed.forEach((w) => {
           const latencyVal = (w.completedTime || now) - w.enqueueTime;
-          const qTime = latencyVal - (w.processingTime || 350);
+          const defaultPTime = w.isCpu ? 3000 : 680;
+          const qTime = latencyVal - (w.processingTime || defaultPTime);
           state.latencyStats.push(latencyVal);
           state.processedCount += 1;
-          newLogs.push(`[WORKER] Finished processing ${w.id}. Turnaround: ${latencyVal}ms (GPU: ${w.processingTime || 350}ms, Queue: ${Math.max(0, qTime)}ms).`);
+          const unitLabel = w.isCpu ? 'CPU' : 'GPU';
+          newLogs.push(`[WORKER] Finished processing ${w.id} on ${unitLabel}. Turnaround: ${latencyVal}ms (${unitLabel}: ${w.processingTime || defaultPTime}ms, Queue: ${Math.max(0, qTime)}ms).`);
+          if (w.symptom) {
+            state.cacheStore.add(w.symptom);
+          }
         });
         state.activeWorkers = remainingWorkers;
       }
@@ -145,47 +175,84 @@ export const SystemSimulator: React.FC = () => {
           priority = 1;
         }
 
+        const source = Math.random() < 0.5 ? 'web' : 'whatsapp';
+        
+        // Choose symptom description
+        let symptom = "";
+        const isRepeated = Math.random() < 0.85;
+        if (isRepeated) {
+          const pool = type === 'routine' ? SYMPTOMS_ROUTINE : type === 'urgent' ? SYMPTOMS_URGENT : SYMPTOMS_EMERGENCY;
+          const rIndex = Math.floor(Math.random() * pool.length);
+          symptom = pool[rIndex];
+        } else {
+          symptom = `Unique symptom report #${state.requestIndex}`;
+        }
+
+
         const newReq: RequestItem = {
           id: `REQ-${state.requestIndex}`,
           type,
           priority,
-          enqueueTime: now
+          enqueueTime: now,
+          source,
+          symptom
         };
 
-        newLogs.push(`[REQUEST] Received ${newReq.id} - ${type.toUpperCase()}`);
+        const channelLabel = source === 'web' ? 'Web' : 'WhatsApp';
+        newLogs.push(`[REQUEST] Received ${newReq.id} (${channelLabel}) - "${symptom}" [${type.toUpperCase()}]`);
 
-        if (type === 'routine' && cacheEnabled && Math.random() < 0.61) {
-          newLogs.push(`[CACHE] L1/L2 Cache Hit for ${newReq.id}. Returned in 2ms.`);
-          state.latencyStats.push(2);
-          state.processedCount += 1;
-        }
-        else if (type === 'emergency' && triageBypassEnabled) {
-          newLogs.push(`[SAFETY] Emergency bypass for ${newReq.id}. Routed directly (5ms).`);
+        if (type === 'emergency' && triageBypassEnabled) {
+          const bypassMsg = source === 'web'
+            ? `[SAFETY] Web emergency bypass for ${newReq.id}. Routed directly to emergency services (5ms).`
+            : `[SAFETY] WhatsApp emergency bypass for ${newReq.id}. Routed directly to 108/ER listing (5ms).`;
+          newLogs.push(bypassMsg);
           state.latencyStats.push(5);
           state.processedCount += 1;
         }
         else {
-          if (type === 'routine' && cacheEnabled) {
-            newLogs.push(`[CACHE] Cache Miss for ${newReq.id}. Enqueuing...`);
+          let isCacheHit = false;
+          if (cacheEnabled && state.cacheStore.has(symptom)) {
+            isCacheHit = true;
           }
-          state.queue.push(newReq);
 
-          state.queue.sort((a, b) => {
-            if (queueAgingEnabled) {
-              const ageA = (now - a.enqueueTime) / 1000;
-              const ageB = (now - b.enqueueTime) / 1000;
-              const scoreA = a.priority - ageA * 0.5;
-              const scoreB = b.priority - ageB * 0.5;
-              return scoreA - scoreB;
+          if (isCacheHit) {
+            // cached requests latency is: 20ms p50 / 213ms p99
+            const randLat = Math.random();
+            let cacheLatency = 20;
+            if (randLat < 0.50) {
+              cacheLatency = 18 + Math.round(Math.random() * 4);
+            } else if (randLat < 0.99) {
+              cacheLatency = 22 + Math.round(Math.random() * 178);
+            } else {
+              cacheLatency = 213 + Math.round(Math.random() * 17);
             }
-            return a.priority - b.priority;
-          });
 
-          if (state.queue.length > 50) {
-            setGameState('crashed');
-            setCrashReason('QUEUE_OVERFLOW');
-            newLogs.push(`[CRITICAL] Queue Overflow! Capacity (> 50) exceeded.`);
-            clearInterval(intervalId);
+            newLogs.push(`[CACHE] L1/L2 Cache Hit for ${newReq.id} ("${symptom}"). Returned in ${cacheLatency}ms.`);
+            state.latencyStats.push(cacheLatency);
+            state.processedCount += 1;
+          } else {
+            if (cacheEnabled) {
+              newLogs.push(`[CACHE] Cache Miss for ${newReq.id} ("${symptom}"). Enqueuing for full inference...`);
+            }
+            state.queue.push(newReq);
+
+            state.queue.sort((a, b) => {
+              if (queueAgingEnabled) {
+                const ageA = (now - a.enqueueTime) / 1000;
+                const ageB = (now - b.enqueueTime) / 1000;
+                const scoreA = a.priority - ageA * 0.5;
+                const scoreB = b.priority - ageB * 0.5;
+                return scoreA - scoreB;
+              }
+              return a.priority - b.priority;
+            });
+
+            if (state.queue.length > 50) {
+              setGameState('crashed');
+              setCrashReason('QUEUE_OVERFLOW');
+              newLogs.push(`[CRITICAL] Queue Overflow! Capacity (> 50) exceeded.`);
+              clearInterval(intervalId);
+            }
           }
         }
 
@@ -193,25 +260,56 @@ export const SystemSimulator: React.FC = () => {
         state.nextRequestDelay = getNextInterval(state.requestIndex);
       }
 
-      if (gameState === 'playing' && state.queue.length > 0 && state.activeWorkers.length < workersCount) {
-        const availableSlots = workersCount - state.activeWorkers.length;
-        const toDispatch = state.queue.slice(0, availableSlots);
-        state.queue = state.queue.slice(availableSlots);
-
-        toDispatch.forEach((req) => {
-          const pTime = 350 + Math.round((Math.random() - 0.5) * 60); // Jitter: 320ms - 380ms
-          req.processingTime = pTime;
-          req.completedTime = now + pTime;
-          state.activeWorkers.push(req);
-          newLogs.push(`[WORKER] Dispatching ${req.id} to GPU...`);
-        });
+      if (gameState === 'playing' && state.queue.length > 0) {
+        const activeGpuCount = state.activeWorkers.filter(w => !w.isCpu).length;
+        const availableGpuSlots = workersCount - activeGpuCount;
+        
+        // Dispatch to GPU if slots are available and VRAM is under safety threshold
+        if (availableGpuSlots > 0 && state.vram < 90) {
+          const toDispatchGpu = state.queue.slice(0, availableGpuSlots);
+          state.queue = state.queue.slice(availableGpuSlots);
+          
+          toDispatchGpu.forEach((req) => {
+            // GPU miss/inference latency: 680ms p50 / 1.53s p99
+            const randLat = Math.random();
+            let pTime = 680;
+            if (randLat < 0.50) {
+              pTime = 650 + Math.round(Math.random() * 60);
+            } else if (randLat < 0.99) {
+              pTime = 710 + Math.round(Math.random() * 790);
+            } else {
+              pTime = 1530 + Math.round(Math.random() * 70);
+            }
+            req.processingTime = pTime;
+            req.completedTime = now + pTime;
+            req.isCpu = false;
+            state.activeWorkers.push(req);
+            newLogs.push(`[WORKER] Dispatching ${req.id} to GPU...`);
+          });
+        }
+        // CPU Fallback logic if VRAM threshold is breached
+        else if (cpuFallbackEnabled && state.vram >= 90) {
+          const toDispatchCpu = state.queue.slice(0, Math.min(state.queue.length, 2));
+          state.queue = state.queue.slice(toDispatchCpu.length);
+          
+          toDispatchCpu.forEach((req) => {
+            // CPU failover latency: 3000ms base
+            const pTime = 3000 + Math.round((Math.random() - 0.5) * 300); // Jitter: 2850ms - 3150ms
+            req.processingTime = pTime;
+            req.completedTime = now + pTime;
+            req.isCpu = true;
+            state.activeWorkers.push(req);
+            newLogs.push(`[SAFETY] VRAM threshold (90%) breached. Failover: Routing ${req.id} to CPU worker thread pool (3.0s latency penalty).`);
+          });
+        }
       }
 
       // Caching optimizations (quantized KV-caching) reduce baseline VRAM footprint
       const idleVram = cacheEnabled ? 50 : 70;
       // 3 workers on a 6GB GPU exceeds limits and will lead to CUDA OOM
       const workerVramCost = workersCount === 3 ? 20 : 10;
-      const baseVram = idleVram + state.activeWorkers.length * workerVramCost;
+      const activeGpuCount = state.activeWorkers.filter(w => !w.isCpu).length;
+      const baseVram = idleVram + activeGpuCount * workerVramCost;
       const loadSpike = state.queue.length * 2;
       state.vram = Math.min(100, baseVram + loadSpike);
 
@@ -243,7 +341,7 @@ export const SystemSimulator: React.FC = () => {
     }, 100);
 
     return () => clearInterval(intervalId);
-  }, [gameState, cacheEnabled, triageBypassEnabled, queueAgingEnabled, workersCount]);
+  }, [gameState, cacheEnabled, triageBypassEnabled, queueAgingEnabled, workersCount, cpuFallbackEnabled]);
 
   const avgLatency = renderStats.latencyStats.length > 0
     ? Math.round(renderStats.latencyStats.reduce((sum, val) => sum + val, 0) / renderStats.latencyStats.length)
@@ -256,34 +354,34 @@ export const SystemSimulator: React.FC = () => {
   const p99Val = renderStats.latencyStats.length > 0 
     ? [...renderStats.latencyStats].sort((a, b) => a - b)[Math.floor(renderStats.latencyStats.length * 0.99)] || 0 
     : 0;
-
   const getVictoryRank = () => {
     let score = 0;
     if (cacheEnabled) score += 1;
     if (triageBypassEnabled) score += 1;
     if (queueAgingEnabled) score += 1;
+    if (cpuFallbackEnabled) score += 1;
     if (workersCount === 2) score += 1;
 
     let baseLevel = "";
     let baseTitle = "";
     let baseDesc = "";
 
-    if (score === 4) {
+    if (score === 5) {
       baseLevel = "Level IV";
       baseTitle = "Founding Systems Engineer";
-      baseDesc = "Perfect implementation! You enabled Caching, Triage, and Queue Aging with exactly 2 workers, achieving optimal average latency. This successfully replicates Roshan's actual systems work at SymptomWise—preventing VRAM OOMs and reducing latency via a 61% Cache Hit Rate and Twilio triage bypass!";
+      baseDesc = "Perfect implementation! You enabled Caching, Triage, Queue Aging, and CPU Fallback failover with exactly 2 workers, achieving optimal average latency. This successfully replicates Roshan's actual systems work at SymptomWise—preventing VRAM OOMs and reducing p99 latency to 213ms via a 61% Cache Hit Rate, safety triage bypass, and failover protection!";
     } else if (score >= 3) {
       baseLevel = "Level III";
       baseTitle = "Systems SDE-II";
-      baseDesc = "Excellent setup. You utilized Caching, Triage, and Queue Aging correctly to meet the SLA. Using more worker slots or slight delays placed you at a solid SDE-2 capacity.";
+      baseDesc = "Excellent setup. You utilized Caching, Triage, and Queue Aging correctly to meet the SLA. Missing some safety configurations or optimal worker scaling kept you at a solid SDE-2 capacity.";
     } else if (score === 2) {
       baseLevel = "Level II";
       baseTitle = "Systems SDE-I";
-      baseDesc = "Good configuration. You used caching/bypass to shield the GPU, but missing queue aging or optimal thread counts limits system throughput under severe traffic spikes.";
+      baseDesc = "Good configuration. You used caching/bypass to shield the GPU, but missing queue aging, optimal worker bounds, or failover fallbacks limits system throughput under severe traffic spikes.";
     } else {
       baseLevel = "Level I";
       baseTitle = "Junior Developer";
-      baseDesc = "System passed, but the configuration is fragile! Spawning threads without queue aging, exact cache matches, or context boundaries is highly prone to production dropouts.";
+      baseDesc = "System passed, but the configuration is fragile! Spawning threads without queue aging, exact cache matches, or failover boundaries is highly prone to production dropouts.";
     }
 
     if (gameState === 'crashed') {
@@ -309,13 +407,13 @@ export const SystemSimulator: React.FC = () => {
       }
     }
 
-    const metSLA = avgLatency <= 180;
+    const metSLA = avgLatency <= 300;
 
     if (!metSLA) {
       return {
         level: `${baseLevel} (SLA Violated)`,
         title: `${baseTitle} (SLA Violator)`,
-        description: `Average latency was ${avgLatency}ms, exceeding the 180ms SLA. While your configuration aligned with ${baseLevel} standards, you need to further optimize cache hit rates, bypass rules, or queue aging to meet the response criteria.`
+        description: `Average latency was ${avgLatency}ms, exceeding the 300ms SLA. While your configuration aligned with ${baseLevel} standards, you need to further optimize cache hit rates, bypass rules, or queue aging to meet the response criteria.`
       };
     }
 
@@ -352,7 +450,7 @@ export const SystemSimulator: React.FC = () => {
             <div className="space-y-3">
               <h3 className="text-zinc-100 font-black text-sm uppercase tracking-tight">SymptomWise LLM Pipeline Simulator</h3>
               <p className="text-[11px] text-zinc-400 max-w-md leading-relaxed">
-                Test your systems engineering chops! Simulate live traffic spikes on an RTX 3050. Configure caching, Twilio emergency triage bypass, and worker threads to prevent CUDA OOM crashes and meet the 180ms Average Latency SLA.
+                Test your systems engineering chops! Simulate live traffic spikes on an RTX 3050. Configure caching, emergency triage bypass, and worker threads to prevent CUDA OOM crashes and meet the 300ms Average Latency SLA.
               </p>
             </div>
             <button
@@ -403,10 +501,10 @@ export const SystemSimulator: React.FC = () => {
               <div className="space-y-2">
                 <h3 className="text-zinc-100 font-extrabold text-sm uppercase">System Overload Simulator</h3>
                 <p className="text-[11px] text-zinc-400 max-w-sm leading-relaxed">
-                  Route 100 requests under a <span className="text-zinc-100 font-bold underline decoration-2 decoration-[#38bdf8]">180ms Average Latency SLA</span>. Caching mirrors Roshan's actual production benchmarks: a <span className="text-zinc-100 font-bold">61% Cache Hit Rate</span> and <span className="text-zinc-100 font-bold">350ms GPU Miss Penalty</span>.
+                  Route 100 requests under a <span className="text-zinc-100 font-bold underline decoration-2 decoration-[#38bdf8]">300ms Average Latency SLA</span>. Caching mirrors Roshan's actual production benchmarks: a <span className="text-zinc-100 font-bold">61% Cache Hit Rate</span> and <span className="text-zinc-100 font-bold">680ms GPU Miss Penalty</span>.
                 </p>
                 <div className="text-[9px] text-zinc-500 font-bold border border-dashed border-zinc-800 p-2 bg-[#13151b] inline-block">
-                  SymptomWise Benchmarks: 61% Cache Hit | 350ms GPU Penalty
+                  SymptomWise Benchmarks: 61% Cache Hit | 680ms GPU Penalty
                 </div>
               </div>
               <button
@@ -433,7 +531,7 @@ export const SystemSimulator: React.FC = () => {
                 <div className="text-[10px] text-zinc-400 space-y-0.5 text-left bg-[#13151b] p-3 border border-zinc-800 max-w-xs font-mono">
                   <div>[BOOT] Allocating worker thread pool...</div>
                   <div>[BOOT] Locking bounded priority queue...</div>
-                  <div>[BOOT] SLA Target: Avg Latency &lt; 180ms</div>
+                  <div>[BOOT] SLA Target: Avg Latency &lt; 300ms</div>
                   <div className="text-zinc-200 font-bold mt-2 text-center animate-pulse">
                     LOAD SPIKE IMMINENT IN {bootCountdown}S
                   </div>
@@ -499,7 +597,7 @@ export const SystemSimulator: React.FC = () => {
               className="py-4 space-y-4"
             >
               <div className="flex flex-col items-center text-center space-y-2">
-                {avgLatency <= 180 ? (
+                {avgLatency <= 300 ? (
                   <>
                     <CheckCircle2 size={40} className="text-green-500 animate-pulse" />
                     <h3 className="text-green-500 font-extrabold text-sm uppercase">SIMULATION SUCCESSFUL</h3>
@@ -512,7 +610,7 @@ export const SystemSimulator: React.FC = () => {
                     <ShieldAlert size={40} className="text-red-500 animate-pulse" />
                     <h3 className="text-red-500 font-extrabold text-sm uppercase">SLA VIOLATED</h3>
                     <p className="text-[10px] text-zinc-400">
-                      All requests processed, but the average latency exceeded the 180ms SLA target.
+                      All requests processed, but the average latency exceeded the 300ms SLA target.
                     </p>
                   </>
                 )}
@@ -521,7 +619,7 @@ export const SystemSimulator: React.FC = () => {
               <div className="border-2 border-[#1f2026] bg-[#13151b] p-4 rounded-none space-y-2 shadow-brutalist-sm">
                 <div className="flex justify-between items-center border-b border-zinc-800 pb-2">
                   <span className="font-extrabold text-[10px] uppercase text-zinc-400">Performance Rank:</span>
-                  <span className={`px-2 py-0.5 font-extrabold text-[9px] uppercase tracking-wider ${avgLatency <= 180 ? 'bg-zinc-100 text-zinc-950' : 'bg-red-950 text-red-200 border border-red-800'}`}>
+                  <span className={`px-2 py-0.5 font-extrabold text-[9px] uppercase tracking-wider ${avgLatency <= 300 ? 'bg-zinc-100 text-zinc-950' : 'bg-red-950 text-red-200 border border-red-800'}`}>
                     {victoryRank.level}
                   </span>
                 </div>
@@ -535,7 +633,7 @@ export const SystemSimulator: React.FC = () => {
 
               <div className="grid grid-cols-3 gap-1.5 text-center text-[9px] font-bold">
                 <div className="p-2 border border-[#1f2026] bg-[#090a0d]">
-                  FINAL AVG LATENCY: <span className={`${avgLatency <= 180 ? 'text-green-500' : 'text-red-500'} font-black`}>{avgLatency}ms</span>
+                  FINAL AVG LATENCY: <span className={`${avgLatency <= 300 ? 'text-green-500' : 'text-red-500'} font-black`}>{avgLatency}ms</span>
                 </div>
                 <div className="p-2 border border-[#1f2026] bg-[#090a0d]">
                   FINAL p90 LATENCY: <span className="text-zinc-100 font-black">{p90Val}ms</span>
@@ -578,7 +676,7 @@ export const SystemSimulator: React.FC = () => {
                 <div className="mt-1 font-extrabold text-zinc-100 text-xs">
                   {avgLatency ? `${avgLatency}ms` : '---'}
                 </div>
-                <div className="text-[8px] text-[#38bdf8] font-bold mt-0.5">SLA &lt; 180ms</div>
+                <div className="text-[8px] text-[#38bdf8] font-bold mt-0.5">SLA &lt; 300ms</div>
               </div>
 
               <div className="p-2.5 border-2 border-[#1f2026] bg-[#090a0d] flex flex-col justify-between">
@@ -668,15 +766,15 @@ export const SystemSimulator: React.FC = () => {
                     <span className="text-[9px] font-extrabold text-zinc-200 flex items-center gap-1.5">
                       <span>GPU Workers</span>
                       <span className="px-1.5 py-0.5 bg-red-950/30 text-red-400 text-[8px] font-black border border-red-500/20">
-                        Miss Penalty: 350ms
+                        Miss Penalty: 680ms
                       </span>
                     </span>
-                    <span className="text-[8px] text-zinc-500 font-bold">Active: {renderStats.activeWorkers.length} / {workersCount}</span>
+                    <span className="text-[8px] text-zinc-500 font-bold">Active: {renderStats.activeWorkers.filter(w => !w.isCpu).length} / {workersCount}</span>
                   </div>
                   <div className="grid grid-cols-3 gap-2.5">
                     {Array.from({ length: 3 }).map((_, idx) => {
                       const isUnlocked = idx < workersCount;
-                      const isBusy = renderStats.activeWorkers[idx];
+                      const isBusy = renderStats.activeWorkers.filter(w => !w.isCpu)[idx];
                       return (
                         <div 
                           key={idx}
@@ -688,7 +786,7 @@ export const SystemSimulator: React.FC = () => {
                                 : 'border border-zinc-800 text-zinc-500 bg-[#13151b]'
                           }`}
                         >
-                          <span className="font-extrabold text-[8px]">W{idx + 1}</span>
+                          <span className="font-extrabold text-[8px]">GPU W{idx + 1}</span>
                           <span className="text-[7px] font-bold mt-0.5">
                             {!isUnlocked ? 'LOCKED' : isBusy ? 'INFERENCE' : 'IDLE'}
                           </span>
@@ -697,12 +795,34 @@ export const SystemSimulator: React.FC = () => {
                     })}
                   </div>
                 </div>
+
+                {renderStats.activeWorkers.filter(w => w.isCpu).length > 0 && (
+                  <div className="p-3 border-2 border-amber-950 bg-amber-950/15 rounded-none animate-fade-in space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[9px] font-extrabold text-amber-400 flex items-center gap-1.5 animate-pulse">
+                        <span className="h-2 w-2 rounded-full bg-amber-500" />
+                        <span>CPU Failover Workers</span>
+                        <span className="px-1.5 py-0.5 bg-amber-950 text-amber-400 text-[8px] font-black border border-amber-800/40">
+                          SLA Penalty: 1.6s
+                        </span>
+                      </span>
+                      <span className="text-[8px] text-amber-500 font-bold">Active: {renderStats.activeWorkers.filter(w => w.isCpu).length}</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
+                      {renderStats.activeWorkers.filter(w => w.isCpu).map((w, idx) => (
+                        <div key={idx} className="px-2 py-1 border border-amber-800/50 bg-amber-950/30 text-amber-300 text-[8px] font-mono select-none">
+                          {w.id} (CPU)
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
             {!cacheEnabled && gameState === 'playing' && (
               <div className="p-2 bg-red-950/20 border-2 border-red-900/40 text-red-400 font-bold text-[9px] text-center leading-normal">
-                WARNING: L1/L2 Cache disabled! 100% of routine queries executing full 350ms GPU inference. VRAM OOM or SLA violation imminent.
+                WARNING: L1/L2 Cache disabled! 100% of routine queries executing full 680ms GPU inference. VRAM OOM or SLA violation imminent.
               </div>
             )}
           </div>
@@ -746,7 +866,18 @@ export const SystemSimulator: React.FC = () => {
                 />
               </label>
 
-              <div className="flex items-center justify-between p-2.5 border-2 border-[#1f2026] bg-[#13151b] shadow-brutalist-sm">
+              <label className={`flex items-center justify-between p-2.5 border-2 border-[#1f2026] bg-[#13151b] shadow-brutalist-sm hover:bg-[#1a1d26] transition-all ${gameState === 'crashed' || gameState === 'success' ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+                <span className="text-[10px] text-zinc-200 font-bold">CPU Fallback</span>
+                <input 
+                  type="checkbox" 
+                  checked={cpuFallbackEnabled} 
+                  onChange={(e) => setCpuFallbackEnabled(e.target.checked)}
+                  disabled={gameState === 'crashed' || gameState === 'success'}
+                  className="accent-[#38bdf8] h-3.5 w-3.5 border-2 border-zinc-700 cursor-pointer disabled:cursor-not-allowed"
+                />
+              </label>
+
+              <div className="flex items-center justify-between p-2.5 border-2 border-[#1f2026] bg-[#13151b] shadow-brutalist-sm col-span-2">
                 <span className="text-[10px] text-zinc-200 font-bold">Workers Count</span>
                 <div className="flex gap-1">
                   {([1, 2, 3] as const).map((num) => {

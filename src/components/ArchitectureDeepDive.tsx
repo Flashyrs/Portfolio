@@ -22,7 +22,7 @@ interface ArchitectureDeepDiveProps {
   setView: (val: 'home' | 'deep-dive') => void;
 }
 
-type NodeKey = 'twilio' | 'gateway' | 'context' | 'safety' | 'cache' | 'queue' | 'workers' | 'llm';
+type NodeKey = 'ingestion' | 'gateway' | 'context' | 'safety' | 'cache' | 'queue' | 'workers' | 'llm';
 
 export const ArchitectureDeepDive: React.FC<ArchitectureDeepDiveProps> = ({ setView }) => {
   const [activeNode, setActiveNode] = useState<NodeKey>('cache');
@@ -37,16 +37,16 @@ export const ArchitectureDeepDive: React.FC<ArchitectureDeepDiveProps> = ({ setV
     failureMitigation: string;
     tag: string;
   }> = {
-    twilio: {
-      title: 'WhatsApp Webhook (Twilio)',
-      sub: 'Async Webhook Ingest Layer',
-      description: 'Receives asynchronous HTTP POST request streams from Twilio webhooks whenever a patient submits symptom descriptions on WhatsApp. Standardized status response is returned instantly to keep webhook sockets open and free.',
+    ingestion: {
+      title: 'Webpage & WhatsApp Ingestion',
+      sub: 'Multi-Channel Ingest Layer',
+      description: 'Receives real-time HTTP client requests from the webpage chatbot and asynchronous webhook streams from Twilio WhatsApp. Standardized responses are returned instantly to decouple connection handling from core LLM processing.',
       metrics: [
-        { label: 'Ingest Latency', value: '12ms' },
-        { label: 'HTTP Status', value: '200 OK' },
-        { label: 'Format', value: 'JSON payload' }
+        { label: 'Web Latency', value: '8ms' },
+        { label: 'WhatsApp Latency', value: '12ms' },
+        { label: 'Channels', value: 'Web / Twilio' }
       ],
-      failureMitigation: 'Twilio retries requests if latency exceeds 15s. We decoupled ingestion from processing by dumping tasks to Redis queue instantly, acknowledging the webhook in under 15ms. Redis hashes provide deduplication.',
+      failureMitigation: 'Twilio retries webhooks if processing delays exceed 15s, and web clients require fast responses. Decoupling ingestion from GPU workers via instant Redis queue dumping ensures sub-15ms response times. Redis transaction hashes prevent retry deduplication.',
       tag: 'INGESTION'
     },
     gateway: {
@@ -126,8 +126,8 @@ export const ArchitectureDeepDive: React.FC<ArchitectureDeepDiveProps> = ({ setV
       sub: 'VRAM-Optimized GPU Inference',
       description: 'Executes generative NLP algorithms on the patient symptoms, outputting triage guides. Runs on a localized RTX 3050 GPU using model quantization (4-bit).',
       metrics: [
-        { label: 'Base GPU Latency', value: '350ms' },
-        { label: 'CPU Fallback', value: '1600ms' },
+        { label: 'Base GPU Latency', value: '680ms' },
+        { label: 'CPU Fallback', value: '3000ms' },
         { label: 'Model Format', value: 'GGUF Q4' }
       ],
       failureMitigation: 'On CUDA Out-Of-Memory (OOM) triggers, request scheduling delegates task pipelines to a secondary CPU worker thread pool, maintaining uptime at a latency compromise.',
@@ -143,13 +143,13 @@ export const ArchitectureDeepDive: React.FC<ArchitectureDeepDiveProps> = ({ setV
     },
     {
       title: 'Two-Tier Cache Strategy (Exact vs Semantic)',
-      details: 'Raw LLM processing takes ~350ms. L1 Exact Match caches raw query strings, which only yield a 15% hit rate. L2 Semantic Cache parses semantic symptom shapes (categorizing NEG/SEV/SYM signatures) and achieves a 61% hit rate. This semantic abstraction shifts processing from heavy GPU tensor mathematics to lightning-fast Redis lookups.',
-      impact: 'p99 latency dropped from 1.2s to 213ms. 61% of requests bypass GPU compute entirely.'
+      details: 'Raw LLM processing takes ~680ms. L1 Exact Match caches raw query strings, which only yield a 15% hit rate. L2 Semantic Cache parses semantic symptom shapes (categorizing NEG/SEV/SYM signatures) and achieves a 61% hit rate. This semantic abstraction shifts processing from heavy GPU tensor mathematics to lightning-fast Redis lookups.',
+      impact: 'Cached p99 latency is 213ms (vs 1.53s inference p99). 61% of requests bypass GPU compute entirely.'
     },
     {
       title: 'Queue Scheduling: First-In-First-Out vs Bounded Priority with Aging',
       details: 'Under spikes, a simple FIFO queue causes emergency triage pipelines to wait behind routine diagnostic checkups. Implementing a Priority Queue ensures emergency triggers execute first. However, during high spikes, routine queries suffered infinite starvation. Introducing an Aging Multiplier (+0.5 priority score per second in queue) balances latency SLA rules.',
-      impact: 'Emergency latency guaranteed under 250ms; routine queries met the 180ms SLA under 95% load conditions.'
+      impact: 'Emergency latency guaranteed under 250ms; routine queries met the 300ms SLA under 95% load conditions.'
     },
     {
       title: 'Inference Infrastructure: GPU CUDA vs CPU Thread Pools',
@@ -203,11 +203,11 @@ export const ArchitectureDeepDive: React.FC<ArchitectureDeepDiveProps> = ({ setV
               
               {/* Row 1: Entry Gateways */}
               <div className="grid grid-cols-3 gap-4 w-full">
-                {/* Node 1: Twilio */}
+                {/* Node 1: Ingestion */}
                 <button 
-                  onClick={() => setActiveNode('twilio')}
+                  onClick={() => setActiveNode('ingestion')}
                   className={`p-3 border-2 text-center transition-all relative cursor-pointer outline-none rounded-none ${
-                    activeNode === 'twilio' 
+                    activeNode === 'ingestion' 
                       ? 'border-accent-teal bg-[#0c2e40] text-theme-text font-black shadow-brutalist-sm scale-[1.03]' 
                       : 'border-zinc-800 bg-[#13151b] hover:border-zinc-700 hover:scale-[1.01]'
                   }`}
@@ -216,8 +216,8 @@ export const ArchitectureDeepDive: React.FC<ArchitectureDeepDiveProps> = ({ setV
                     <Zap size={10} className="text-accent-teal" />
                     <span>1. Ingestion</span>
                   </div>
-                  <div className="text-[8px] text-zinc-500 mt-1 font-mono">Twilio API Ingress</div>
-                  {activeNode === 'twilio' && <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-accent-teal rotate-45" />}
+                  <div className="text-[8px] text-zinc-500 mt-1 font-mono">Web & WhatsApp Ingress</div>
+                  {activeNode === 'ingestion' && <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-accent-teal rotate-45" />}
                 </button>
 
                 {/* Node 2: Gateway */}
@@ -494,7 +494,7 @@ export const ArchitectureDeepDive: React.FC<ArchitectureDeepDiveProps> = ({ setV
                 
                 {/* SLA Target Line overlay indicator */}
                 <div className="absolute top-[35%] left-0 w-full border-t border-dashed border-red-500/35 z-0 flex justify-end pr-4 pointer-events-none">
-                  <span className="text-[7.5px] font-mono font-bold text-red-400 uppercase tracking-wider bg-[#090a0d] px-1 translate-y-[-5px]">SLA Threshold (180ms)</span>
+                  <span className="text-[7.5px] font-mono font-bold text-red-400 uppercase tracking-wider bg-[#090a0d] px-1 translate-y-[-5px]">SLA Threshold (300ms)</span>
                 </div>
 
                 {/* SVG Polyline drawing based on Scenario state */}
@@ -539,7 +539,7 @@ export const ArchitectureDeepDive: React.FC<ArchitectureDeepDiveProps> = ({ setV
                   {/* Axis labels */}
                   <text x="5" y="232" fill="#52525b" fontFamily="monospace" fontSize="8">Request Ingress Stream (0 &rarr; 100)</text>
                   <text x="5" y="15" fill="#52525b" fontFamily="monospace" fontSize="8">Average Latency (ms)</text>
-                  <text x="660" y="175" fill="#52525b" fontFamily="monospace" fontSize="8">180ms Target</text>
+                  <text x="660" y="175" fill="#52525b" fontFamily="monospace" fontSize="8">300ms Target</text>
                 </svg>
                 
                 {/* Indicator text tags */}
