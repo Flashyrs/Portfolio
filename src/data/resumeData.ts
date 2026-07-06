@@ -73,24 +73,24 @@ export const resumeData: ResumeData = {
   about: "I am a backend software engineer specializing in building scalable, low-latency distributed systems, microservices architectures, and high-performance backend services. My expertise spans Java, Spring Boot, Python, Redis, Docker, and AWS. I have a proven track record of designing scalable APIs, asynchronous processing pipelines, and event-driven architectures that deliver measurable improvements in latency, throughput, and system reliability. I am deeply passionate about backend system architecture, data structures, algorithms, and practical AI infrastructure engineering.",
   stats: [
     {
-      value: "500+",
+      value: "600+",
       label: "DSA Problems Solved",
       subtext: "LeetCode & GeeksforGeeks"
     },
     {
-      value: "1784",
+      value: "1890",
       label: "Peak LeetCode Rating",
-      subtext: "Top 8% globally"
+      subtext: "Top 4.84% globally"
     },
     {
-      value: "213ms / 1.53s",
-      label: "p99 Latency",
+      value: "1.2s → 213ms",
+      label: "p99 Latency (before/after caching)",
       subtext: "Cached vs LLM Inference"
     },
     {
-      value: "99.9%",
-      label: "System Availability",
-      subtext: "Sustained during 3x spikes"
+      value: "0 Failed Requests",
+      label: "Load Test Reliability",
+      subtext: "6,261-request Locust load test"
     }
   ],
   experience: [
@@ -194,7 +194,7 @@ export const resumeData: ResumeData = {
       degree: "B.Tech in Computer Science & Engineering (AI/ML Specialization)",
       institution: "Buddha Institute of Technology, Gorakhpur (Affiliated with AKTU, UP)",
       timeline: "Nov 2022 - Jun 2026",
-      gpa: "CGPA 8.0/10"
+      gpa: "CGPA 8.09/10"
     }
   ],
   certifications: [
@@ -203,8 +203,8 @@ export const resumeData: ResumeData = {
     { name: "AWS ML Foundations", issuer: "AWS" }
   ],
   honors: [
-    "Competitive Programming: Achieved a peak LeetCode Contest Rating of 1784 (Top 8% globally); solved over 500 data structures and algorithms problems.",
-    "TechYuva Hackathons: 2-time Runner Up competing cross-functionally against 50+ engineering cohorts."
+    "Competitive Programming: Achieved a peak LeetCode Contest Rating of 1890 (Top 4.84% globally); solved over 600 data structures and algorithms problems.",
+    "TechYuva 10.0: 2nd Runner-Up among competitive engineering cohorts."
   ],
   leadership: [
     "IEEE Student Branch Secretary: Managed resource scheduling, established engineering roadmaps, and spearheaded technical events for over 15 peer engineers."
