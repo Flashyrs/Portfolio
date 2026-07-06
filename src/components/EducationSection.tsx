@@ -114,7 +114,7 @@ export const EducationSection: React.FC = () => {
                       </div>
                       <div>
                         <h4 className="font-semibold text-theme-text text-sm font-sans mb-1.5">
-                          {isCp ? "LeetCode Peak Contest Rating: 1784" : "Hackathon Achievements"}
+                          {isCp ? "LeetCode Peak Contest Rating: 1890" : "Hackathon Achievements"}
                         </h4>
                         <p className="text-xs text-theme-text-muted leading-relaxed font-sans">
                           {honor}
