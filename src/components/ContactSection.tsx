@@ -29,7 +29,7 @@ export const ContactSection: React.FC = () => {
         {/* Section Heading */}
         <div className="mb-16 text-center max-w-xl mx-auto">
           <div className="inline-flex items-center gap-2 text-xs font-mono text-accent-teal mb-2 justify-center">
-            <span>05 // INQUIRIES</span>
+            <span>06 // INQUIRIES & CONTACT</span>
           </div>
           <h2 className="text-3xl font-bold text-theme-text tracking-tight font-sans">
             Get In Touch

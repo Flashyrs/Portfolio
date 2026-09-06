@@ -57,6 +57,10 @@ export const Navbar: React.FC<NavbarProps> = ({ view, setView }) => {
         <div className="hidden md:flex items-center gap-8">
           <a href="#experience" onClick={(e) => handleNavLink(e, 'experience')} className="text-xs uppercase tracking-widest font-mono text-theme-text-muted hover:text-theme-text transition-colors">Experience</a>
           <a href="#projects" onClick={(e) => handleNavLink(e, 'projects')} className="text-xs uppercase tracking-widest font-mono text-theme-text-muted hover:text-theme-text transition-colors">Projects</a>
+          <a href="#live-projects" onClick={(e) => handleNavLink(e, 'live-projects')} className="text-xs uppercase tracking-widest font-mono text-accent-teal hover:underline transition-colors font-bold flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse inline-block" />
+            <span>Live Hub</span>
+          </a>
           <a href="#skills" onClick={(e) => handleNavLink(e, 'skills')} className="text-xs uppercase tracking-widest font-mono text-theme-text-muted hover:text-theme-text transition-colors">Skills</a>
           <a href="#contact" onClick={(e) => handleNavLink(e, 'contact')} className="text-xs uppercase tracking-widest font-mono text-theme-text-muted hover:text-theme-text transition-colors">Contact</a>
         </div>
@@ -125,6 +129,14 @@ export const Navbar: React.FC<NavbarProps> = ({ view, setView }) => {
               className="text-sm font-mono uppercase tracking-wider text-theme-text-muted hover:text-theme-text transition-colors"
             >
               Projects
+            </a>
+            <a
+              href="#live-projects"
+              onClick={(e) => handleNavLink(e, 'live-projects')}
+              className="text-sm font-mono uppercase tracking-wider text-accent-teal hover:underline transition-colors font-bold flex items-center gap-1.5"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+              <span>Live Hub</span>
             </a>
             <a
               href="#skills"

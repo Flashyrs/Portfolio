@@ -61,7 +61,7 @@ export const SimulatorWorkspace: React.FC<SimulatorWorkspaceProps> = ({ activeSi
                       : 'bg-bg-card text-theme-text border-border-muted hover:bg-accent-light'
                   }`}
                 >
-                  Reddit Video Gen
+                  NarrateLoop GenAI
                 </button>
                 <button
                   onClick={() => setActiveSim('both')}
@@ -112,7 +112,7 @@ export const SimulatorWorkspace: React.FC<SimulatorWorkspaceProps> = ({ activeSi
                       <div className="flex items-center gap-2 px-2">
                         <LayoutGrid size={12} className="text-accent-teal" />
                         <h4 className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-400">
-                          Reddit Gen-AI Video Ingestion
+                          NarrateLoop Multimodal GenAI Engine
                         </h4>
                       </div>
                       <GenerativePipelineSimulator />
@@ -138,14 +138,14 @@ export const SimulatorWorkspace: React.FC<SimulatorWorkspaceProps> = ({ activeSi
                         onClick={() => setActiveSim('reddit')}
                         className="text-[9px] font-mono text-[#38bdf8] hover:underline cursor-pointer"
                       >
-                        Try Reddit Gen &rarr;
+                        Try NarrateLoop &rarr;
                       </button>
                     </div>
                     <SystemSimulator />
                   </motion.div>
                 )}
 
-                {/* 3. Reddit Ingestion Pipeline Only */}
+                {/* 3. NarrateLoop Pipeline Only */}
                 {activeSim === 'reddit' && (
                   <motion.div
                     key="reddit-view"
@@ -157,7 +157,7 @@ export const SimulatorWorkspace: React.FC<SimulatorWorkspaceProps> = ({ activeSi
                   >
                     <div className="flex items-center justify-between px-2">
                       <h4 className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-400">
-                        Reddit Gen-AI Video Ingestion
+                        NarrateLoop Multimodal GenAI Engine
                       </h4>
                       <button
                         onClick={() => setActiveSim('symptomwise')}
