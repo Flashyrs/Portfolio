@@ -18,7 +18,7 @@ export const SkillsSection: React.FC = () => {
         {/* Section Heading */}
         <div className="mb-16">
           <div className="flex items-center gap-2 text-xs font-mono text-accent-teal mb-2">
-            <span>03 // EXPERTISE</span>
+            <span>04 // TECHNICAL EXPERTISE</span>
           </div>
           <h2 className="text-3xl font-bold text-theme-text tracking-tight font-sans">
             Technical Stack

@@ -5,6 +5,7 @@ import { StatsSection } from './components/StatsSection';
 import { ExperienceSection } from './components/ExperienceSection';
 import { SimulatorWorkspace } from './components/SimulatorWorkspace';
 import { ProjectsSection } from './components/ProjectsSection';
+import { LiveHubSection } from './components/LiveHubSection';
 import { SkillsSection } from './components/SkillsSection';
 import { EducationSection } from './components/EducationSection';
 import { ContactSection } from './components/ContactSection';
@@ -35,6 +36,7 @@ function App() {
           <ExperienceSection activeSim={activeSim} setActiveSim={setActiveSim} />
           <SimulatorWorkspace activeSim={activeSim} setActiveSim={setActiveSim} />
           <ProjectsSection activeSim={activeSim} setActiveSim={setActiveSim} />
+          <LiveHubSection />
           <SkillsSection />
           <EducationSection />
           <ContactSection />

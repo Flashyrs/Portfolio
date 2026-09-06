@@ -136,6 +136,21 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ setActiveSim, setView 
               <Activity size={14} />
               <span>Architecture Deep Dive</span>
             </button>
+
+            <a
+              href="#live-projects"
+              onClick={(e) => {
+                if (window.location.hash !== '#live-projects') {
+                  e.preventDefault();
+                  document.getElementById('live-projects')?.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+              className="flex items-center gap-2 px-5 py-2.5 bg-accent-light hover:border-accent-teal text-theme-text border-2 border-border-muted font-mono font-bold text-xs transition-all active:scale-95 shadow-brutalist cursor-pointer"
+            >
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              <span>Live Deployments</span>
+              <ArrowUpRight size={14} />
+            </a>
           </motion.div>
 
           {/* Social Links & CTAs */}
@@ -180,6 +195,19 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ setActiveSim, setView 
               <LeetcodeIcon size={18} />
               <span>LeetCode</span>
               <ArrowUpRight size={14} className="text-theme-text-muted group-hover:text-accent-teal" />
+            </a>
+
+            <span className="w-1.5 h-1.5 bg-border-muted hidden sm:inline" />
+
+            <a
+              href={resumeData.links.statusPage}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-sm font-bold text-green-600 dark:text-green-400 hover:text-green-500 transition-all group font-mono"
+            >
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              <span>Uptime Status</span>
+              <ArrowUpRight size={14} className="text-green-600 dark:text-green-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             </a>
           </motion.div>
         </div>
