@@ -120,7 +120,7 @@ export const resumeData: ResumeData = {
       subtext: "Monitored 24/7 via Uptime Kuma"
     },
     {
-      value: "600+",
+      value: "750+",
       label: "DSA Problems Solved",
       subtext: "LeetCode & GeeksforGeeks"
     },
@@ -384,7 +384,7 @@ export const resumeData: ResumeData = {
     { name: "AWS ML Foundations", issuer: "AWS" }
   ],
   honors: [
-    "Competitive Programming: Achieved a peak LeetCode Contest Rating of 1890 (Top 4.84% globally); solved over 600 data structures and algorithms problems.",
+    "Competitive Programming: Achieved a peak LeetCode Contest Rating of 1890 (Top 4.84% globally); solved over 750 data structures and algorithms problems.",
     "TechYuva 10.0: 2nd Runner-Up among competitive engineering cohorts."
   ],
   leadership: [
