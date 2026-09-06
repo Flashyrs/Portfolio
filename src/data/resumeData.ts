@@ -139,7 +139,7 @@ export const resumeData: ResumeData = {
     {
       company: "SymptomWise Pvt. Ltd.",
       role: "Founding Software Engineer",
-      duration: "Oct 2025 - Jan 2026",
+      duration: "Oct 2025 - Apr 2026",
       coreFocus: "Built a secure, logical multi-tenant healthcare AI assistant platform utilizing thread-local request contexts and resource-constrained LLM inference pipelines.",
       bullets: [
         "Architected logical multi-tenancy at zero additional cloud cost by storing active tenant contexts in thread-local storage and overriding Django's ORM manager query scopes to prevent cross-tenant leaks.",
